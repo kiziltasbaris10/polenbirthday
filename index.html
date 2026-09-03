@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Polen'in Doğum Günü 🎂</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+  :root {
+    --pink: #ff5da2;
+    --pink-dark: #e8397f;
+    --purple: #9b5de5;
+    --gold: #ffb703;
+    --orange: #ff8c42;
+    --cream: #fff6ea;
+    --card-bg: #ffffffee;
+    --text: #4a2b3d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    background: radial-gradient(circle at top, #fff0e0, #ffd6e8 55%, #ffc2e0);
+    overflow-x: hidden;
+    padding-bottom: 40px;
+  }
+
+  #confettiCanvas {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 9999;
+  }
+
+  section {
+    width: min(760px, 92vw);
+    margin: 0 auto;
+    padding: 60px 0;
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    border-radius: 24px;
+    padding: 34px 26px;
+    box-shadow: 0 18px 50px rgba(155, 93, 229, .18);
+  }
+
+  /* ── Balloons ── */
+  .balloons {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .balloon {
+    position: absolute;
+    bottom: -120px;
+    font-size: 42px;
+    animation: rise linear infinite;
+    opacity: .85;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) rotate(-6deg); }
+    50%  { transform: translateY(-55vh) rotate(6deg); }
+    100% { transform: translateY(-115vh) rotate(-6deg); }
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding-top: 70px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--pink-dark);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 8vw, 56px);
+    font-weight: 900;
+    line-height: 1.15;
+    background: linear-gradient(90deg, var(--pink-dark), var(--purple), var(--orange));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.sub {
+    margin-top: 14px;
+    font-size: clamp(15px, 2.4vw, 19px);
+    color: #6b4a5c;
+    line-height: 1.7;
+  }
+
+  /* ── Countdown ── */
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 34px 0 10px;
+  }
+  .cd-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 14px;
+    min-width: 78px;
+    box-shadow: 0 10px 24px rgba(255, 93, 162, .25);
+  }
+  .cd-num {
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 900;
+    color: var(--pink-dark);
+  }
+  .cd-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a97b96;
+    margin-top: 2px;
+  }
+  #celebrateMsg {
+    display: none;
+    font-size: clamp(24px, 6vw, 40px);
+    font-weight: 900;
+    color: var(--pink-dark);
+    margin: 30px 0 10px;
+  }
+
+  .btn {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 15px 36px;
+    background: linear-gradient(90deg, var(--pink), var(--purple));
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(155, 93, 229, .35);
+    transition: transform .15s;
+  }
+  .btn:hover { transform: translateY(-2px) scale(1.03); }
+
+  /* ── Section titles ── */
+  .sec-title {
+    text-align: center;
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 900;
+    color: var(--pink-dark);
+    margin-bottom: 8px;
+  }
+  .sec-sub {
+    text-align: center;
+    color: #8a6478;
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  /* ── Timeline ── */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    border-left: 3px dashed var(--pink);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 26px;
+  }
+  .tl-item:last-child { margin-bottom: 0; }
+  .tl-dot {
+    position: absolute;
+    left: -39px;
+    top: 2px;
+    width: 22px; height: 22px;
+    background: var(--gold);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--pink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .tl-when {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: var(--purple);
+    text-transform: uppercase;
+  }
+  .tl-title {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 3px 0 4px;
+  }
+  .tl-desc {
+    font-size: 14.5px;
+    color: #6b4a5c;
+    line-height: 1.6;
+  }
+
+  /* ── Gallery ── */
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    justify-content: center;
+  }
+  .polaroid {
+    background: #fff;
+    padding: 10px 10px 26px;
+    border-radius: 6px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    width: 190px;
+    transform: rotate(var(--rot));
+    cursor: pointer;
+    transition: transform .2s;
+  }
+  .polaroid:hover { transform: rotate(0deg) scale(1.06); z-index: 5; }
+  .polaroid img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+  }
+  .polaroid .cap {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 8px;
+    color: #7a5a68;
+  }
+
+  #lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(20,10,20,.9);
+    z-index: 9000;
+    align-items: center; justify-content: center;
+    cursor: zoom-out;
+  }
+  #lightbox img {
+    max-width: 92vw; max-height: 86vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 50px rgba(0,0,0,.6);
+  }
+
+  /* ── Letter / envelope ── */
+  .letter-wrap { text-align: center; }
+  .envelope {
+    width: 220px;
+    height: 150px;
+    margin: 10px auto 0;
+    position: relative;
+    cursor: pointer;
+  }
+  .env-body {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    border-radius: 10px;
+  }
+  .env-flap {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 76px;
+    background: linear-gradient(135deg, var(--pink-dark), var(--purple));
+    clip-path: polygon(0 0, 100% 0, 50% 85%);
+    transform-origin: top;
+    transition: transform .5s ease;
+    border-radius: 10px 10px 0 0;
+  }
+  .envelope.open .env-flap { transform: rotateX(180deg); }
+  .env-icon {
+    position: absolute;
+    bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 30px;
+  }
+  .env-hint {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #a97b96;
+  }
+  .letter-body {
+    display: none;
+    text-align: left;
+    margin-top: 24px;
+    white-space: pre-line;
+    line-height: 1.85;
+    font-size: 15.5px;
+  }
+  .letter-body.show { display: block; animation: fadeIn .5s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  .letter-sig {
+    margin-top: 18px;
+    font-weight: 800;
+    color: var(--pink-dark);
+    text-align: right;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 20px 10px;
+    color: #a97b96;
+    font-size: 13px;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="balloons" id="balloons"></div>
+<canvas id="confettiCanvas"></canvas>
+
+<!-- ═══ HERO / COUNTDOWN ═══ -->
+<section class="hero">
+  <div class="hero-badge">✨ ÖZEL GÜN YAKLAŞIYOR ✨</div>
+  <h1>İyi ki doğdun<br>Polen! 🎂🎈</h1>
+  <p class="sub">5 Eylül 2000'de dünyaya geldin ve o günden beri hayatı çok daha güzel bir yer haline getirdin.<br>Bu yıl 26 yaşına giriyorsun ve bunu kutlamak için küçük bir şeyler hazırladım 💕</p>
+
+  <div class="countdown" id="countdown">
+    <div class="cd-box"><div class="cd-num" id="cd-days">--</div><div class="cd-label">gün</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">saat</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">dakika</div></div>
+    <div class="cd-box"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">saniye</div></div>
+  </div>
+
+  <div id="celebrateMsg">🎉 BUGÜN SENİN GÜNÜN, POLEN! 🎉</div>
+
+  <button class="btn" id="confettiBtn">🎊 Konfeti Patlat</button>
+</section>
+
+<!-- ═══ TIMELINE ═══ -->
+<section>
+  <div class="card">
+    <div class="sec-title">Bizim Hikayemiz ✦</div>
+    <div class="sec-sub">Anılarımızdan küçük bir seçki</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">🌸</div>
+        <div class="tl-when">5 Eylül 2000</div>
+        <div class="tl-title">Polen doğdu</div>
+        <div class="tl-desc">Dünyanın en güzel gülüşlerinden biri o gün hayata "merhaba" dedi.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">💌</div>
+        <div class="tl-when">31 Ekim</div>
+        <div class="tl-title">İlk mesaj</div>
+        <div class="tl-desc">Attığım o ilk mesaj, hayatımda verdiğim en güzel kararlardan biri oldu.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🌹</div>
+        <div class="tl-when">20 Kasım</div>
+        <div class="tl-title">İlk çiçekler</div>
+        <div class="tl-desc">Mesafeler ne kadar uzak olursa olsun, bir çift çiçekle bile kalbe dokunulabileceğini öğrendik.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🥙</div>
+        <div class="tl-when">İlk buluşma</div>
+        <div class="tl-title">Döner ve bol kahkaha</div>
+        <div class="tl-desc">İlk yediğimiz yemek dönerdi ama hiçbir restoranın sunamayacağı kadar güzel bir sohbetimiz oldu.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">✈️</div>
+        <div class="tl-when">Malpensa Havalimanı</div>
+        <div class="tl-title">Terminal 7'de karşılama</div>
+        <div class="tl-desc">Kalabalığın içinde seni görmek, o ana kadar hissettiğim en güzel heyecanlardan biriydi.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🏓</div>
+        <div class="tl-when">Milano</div>
+        <div class="tl-title">Air hockey turnuvası</div>
+        <div class="tl-desc">Skor 5-4, kazanan Polen. Milano Fashion Week'in gizli şampiyonu da hâlâ o. 👑</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🎂</div>
+        <div class="tl-when">5 Eylül 2026</div>
+        <div class="tl-title">26. yaş günü</div>
+        <div class="tl-desc">Ve şimdi burada, seni kutlamak için bu küçük siteyi hazırladım. Nice mutlu yıllara Polen!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GALLERY ═══ -->
+<section>
+  <div class="sec-title">Anılarımız 📸</div>
+  <div class="sec-sub">Fotoğraflara tıklayarak büyütebilirsin</div>
+  <div class="gallery">
+    <div class="polaroid" style="--rot:-4deg" onclick="openLightbox('pb.jpeg')">
+      <img src="pb.jpeg" alt="Polen ve Barış">
+      <div class="cap">biz 💕</div>
+    </div>
+    <div class="polaroid" style="--rot:3deg" onclick="openLightbox('bp.jpeg')">
+      <img src="bp.jpeg" alt="Barış ve Polen">
+      <div class="cap">yine biz 🥰</div>
+    </div>
+    <div class="polaroid" style="--rot:-2deg" onclick="openLightbox('polen.jpeg')">
+      <img src="polen.jpeg" alt="Polen">
+      <div class="cap">doğum günü kızı 👑</div>
+    </div>
+    <div class="polaroid" style="--rot:4deg" onclick="openLightbox('memory1.jpeg')">
+      <img src="memory1.jpeg" alt="Anı">
+      <div class="cap">güzel bir gün</div>
+    </div>
+    <div class="polaroid" style="--rot:-3deg" onclick="openLightbox('memory2.jpeg')">
+      <img src="memory2.jpeg" alt="Anı">
+      <div class="cap">unutulmaz</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LETTER ═══ -->
+<section>
+  <div class="card letter-wrap">
+    <div class="sec-title">Sana Bir Mektup 💌</div>
+    <div class="sec-sub">Zarfa tıkla ve aç</div>
+
+    <div class="envelope" id="envelope">
+      <div class="env-body"></div>
+      <div class="env-flap"></div>
+      <div class="env-icon">💌</div>
+    </div>
+    <div class="env-hint" id="envHint">👆 Zarfa tıkla</div>
+
+    <div class="letter-body" id="letterBody">Sevgili Polen,
+
+Bugün senin günün ve dünyanın en güzel insanlarından birinin doğum günü olduğunu kutlamak için bu küçük siteyi hazırladım. Aramızda kilometrelerce mesafe olsa da, sana olan sevgimin bir santim bile azalmadığını bilmeni istiyorum.
+
+31 Ekim'de attığım o ilk mesajdan bu yana, sen hayatıma her gün biraz daha güzellik kattın. Sevginle, gülüşünle ve o tertemiz kalbinle bana hep "iyi ki" dedirttin. Milano'daki günlerimiz, havalimanında seni ilk gördüğüm an, birlikte yediğimiz o basit döner… hepsi benim için birer hazine.
+
+Bugün 26 yaşına giriyorsun ve bu yeni yaşının sana sağlık, mutluluk ve hayallerinin hepsini getirmesini diliyorum. Nerede olursam olayım, kalbim her zaman seninle.
+
+İyi ki doğdun, iyi ki varsın Polen. Seni çok seviyorum.</div>
+    <div class="letter-sig" id="letterSig" style="display:none">— Barış 🍁</div>
+  </div>
+</section>
+
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<footer>Polen için sevgiyle hazırlandı 💕</footer>
+
+<script>
+  // balloons
+  const emojis = ["🎈","🎈","🎈","🎉","🎂","💖","🌸"];
+  const balloonWrap = document.getElementById("balloons");
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement("div");
+    b.className = "balloon";
+    b.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    b.style.left = Math.random() * 100 + "vw";
+    b.style.animationDuration = (10 + Math.random() * 10) + "s";
+    b.style.animationDelay = (Math.random() * 12) + "s";
+    balloonWrap.appendChild(b);
+  }
+
+  // countdown -> 5 Eylül 2026 00:00 (local time)
+  const target = new Date(2026, 8, 5, 0, 0, 0);
+  const countdownEl = document.getElementById("countdown");
+  const celebrateEl = document.getElementById("celebrateMsg");
+
+  function tick() {
+    const now = new Date();
+    const diff = target - now;
+    if (diff <= 0) {
+      countdownEl.style.display = "none";
+      celebrateEl.style.display = "block";
+      return true;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById("cd-days").textContent = d;
+    document.getElementById("cd-hours").textContent = String(h).padStart(2, "0");
+    document.getElementById("cd-mins").textContent = String(m).padStart(2, "0");
+    document.getElementById("cd-secs").textContent = String(s).padStart(2, "0");
+    return false;
+  }
+  const isBirthday = tick();
+  const timer = setInterval(() => { if (tick()) clearInterval(timer); }, 1000);
+
+  function burstConfetti() {
+    confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 }, colors: ["#ff5da2","#9b5de5","#ffb703","#ff8c42"] });
+    setTimeout(() => confetti({ particleCount: 100, angle: 60, spread: 70, origin: { x: 0 } }), 200);
+    setTimeout(() => confetti({ particleCount: 100, angle: 120, spread: 70, origin: { x: 1 } }), 200);
+  }
+  document.getElementById("confettiBtn").addEventListener("click", burstConfetti);
+  if (isBirthday) burstConfetti();
+
+  // envelope
+  const envelope = document.getElementById("envelope");
+  const letterBody = document.getElementById("letterBody");
+  const letterSig = document.getElementById("letterSig");
+  const envHint = document.getElementById("envHint");
+  envelope.addEventListener("click", () => {
+    envelope.classList.add("open");
+    letterBody.classList.add("show");
+    letterSig.style.display = "block";
+    envHint.style.display = "none";
+  });
+
+  // lightbox
+  function openLightbox(src) {
+    document.getElementById("lightboxImg").src = src;
+    document.getElementById("lightbox").style.display = "flex";
+  }
+  function closeLightbox() {
+    document.getElementById("lightbox").style.display = "none";
+  }
+</script>
+
+</body>
+</html>
