@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Polen'in Şanslı Yonca Bahçesi 🍀</title>
+<title>Polen'in Doğum Günü 🍀</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   :root {
@@ -14,13 +14,14 @@
     --green: #b3e6a8;
     --green-deep: #7fd67a;
     --ink: #4a3b45;
+    --muted: #8a7288;
     --card: #ffffffef;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
 
   body {
+    min-height: 100svh;
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: var(--ink);
     background: linear-gradient(160deg, #fff7e0 0%, #ffe4f2 45%, #e3f7de 100%);
@@ -29,214 +30,271 @@
 
   #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 
-  section { width: min(760px, 92vw); margin: 0 auto; padding: 54px 0; }
+  .floaters { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .floater { position: absolute; bottom: -60px; font-size: 24px; animation: floatUp linear infinite; opacity: .75; }
+  @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-110vh) rotate(360deg); } }
+
+  /* ── progress dots ── */
+  .progress-dots {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 9px;
+    padding: 16px 10px; z-index: 100;
+    background: linear-gradient(#fff7e0dd, transparent);
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #f0d9e8; cursor: pointer; transition: transform .15s, background .15s;
+  }
+  .dot.active { background: var(--pink-deep); transform: scale(1.3); }
+  .dot.done { background: var(--green-deep); }
+
+  .stage { width: min(720px, 92vw); margin: 0 auto; padding: 78px 0 60px; position: relative; z-index: 1; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: pop .4s ease; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   .card {
     background: var(--card);
     border-radius: 26px;
-    padding: 36px 26px;
+    padding: 34px 26px;
     box-shadow: 0 16px 46px rgba(255, 133, 194, .2);
   }
 
-  /* floating pastel dots */
-  .floaters { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-  .floater {
-    position: absolute; bottom: -60px; font-size: 26px;
-    animation: floatUp linear infinite; opacity: .8;
-  }
-  @keyframes floatUp {
-    0%   { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(-110vh) rotate(360deg); }
-  }
-
-  /* ── Hero ── */
-  .hero { text-align: center; padding-top: 66px; position: relative; z-index: 1; }
-  .hero-badge {
+  .eyebrow {
     display: inline-block; background: var(--pink-deep); color: #fff;
-    font-size: 12px; font-weight: 800; letter-spacing: 2px;
-    padding: 6px 16px; border-radius: 999px; margin-bottom: 16px;
+    font-size: 11.5px; font-weight: 800; letter-spacing: 2px;
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 14px;
   }
-  .hero h1 {
-    font-size: clamp(30px, 7.5vw, 50px); font-weight: 900; line-height: 1.2;
+  h1, h2 {
+    font-weight: 900; line-height: 1.2;
     background: linear-gradient(90deg, var(--pink-deep), var(--yellow-deep), var(--green-deep));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .hero p.sub { margin-top: 14px; font-size: clamp(15px, 2.3vw, 18px); color: #6b5460; line-height: 1.7; }
-  .mascot { font-size: 64px; margin-top: 10px; display: inline-block; animation: sway 2.6s ease-in-out infinite; }
+  h1 { font-size: clamp(28px, 7vw, 44px); }
+  h2 { font-size: clamp(22px, 5vw, 30px); text-align: center; margin-bottom: 6px; }
+  .center { text-align: center; }
+  .sub { margin-top: 12px; font-size: clamp(14.5px, 2.2vw, 17px); color: var(--muted); line-height: 1.7; }
+  .sec-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+  .mascot { font-size: 58px; display: inline-block; animation: sway 2.6s ease-in-out infinite; }
   @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
 
-  .countdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 30px 0 6px; }
-  .cd-box { background: #fff; border-radius: 16px; padding: 14px 12px; min-width: 72px; box-shadow: 0 8px 20px rgba(255,133,194,.25); }
-  .cd-num { font-size: clamp(24px, 5.5vw, 34px); font-weight: 900; color: var(--pink-deep); }
-  .cd-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #b98da8; margin-top: 2px; }
-  #celebrateMsg { display: none; font-size: clamp(22px, 5.5vw, 36px); font-weight: 900; color: var(--pink-deep); margin: 26px 0 6px; }
-
+  /* nav buttons */
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; gap: 10px; }
   .btn {
-    display: inline-block; margin-top: 20px; padding: 14px 32px;
-    background: linear-gradient(90deg, var(--pink-deep), var(--green-deep));
-    color: #fff; font-size: 15.5px; font-weight: 800; border: none; border-radius: 999px;
-    cursor: pointer; box-shadow: 0 10px 24px rgba(127, 214, 122, .35); transition: transform .15s;
+    padding: 13px 30px; border: none; border-radius: 999px; cursor: pointer;
+    font-size: 15px; font-weight: 800; transition: transform .15s, opacity .15s;
   }
-  .btn:hover { transform: translateY(-2px) scale(1.03); }
-  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-primary { background: linear-gradient(90deg, var(--pink-deep), var(--green-deep)); color: #fff; box-shadow: 0 10px 22px rgba(127,214,122,.32); }
+  .btn-primary:hover { transform: translateY(-2px) scale(1.02); }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .btn-ghost:hover { color: var(--pink-deep); }
+  .btn-full { width: 100%; }
 
-  .sec-title { text-align: center; font-size: clamp(22px, 4.5vw, 30px); font-weight: 900; color: var(--pink-deep); margin-bottom: 6px; }
-  .sec-sub { text-align: center; color: #8a7288; font-size: 14px; margin-bottom: 26px; }
+  /* ── intro / countdown ── */
+  .countdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 26px 0 6px; }
+  .cd-box { background: #fff; border-radius: 16px; padding: 14px 12px; min-width: 70px; box-shadow: 0 8px 20px rgba(255,133,194,.25); }
+  .cd-num { font-size: clamp(22px, 5.5vw, 32px); font-weight: 900; color: var(--pink-deep); }
+  .cd-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 2px; }
+  #celebrateMsg { display: none; font-size: clamp(20px, 5.5vw, 32px); font-weight: 900; color: var(--pink-deep); margin: 22px 0 6px; text-align: center; }
 
-  /* ── Clover garden game ── */
-  .progress-wrap { text-align: center; margin-bottom: 22px; }
-  .progress-label { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
-  .progress-bar { height: 10px; border-radius: 999px; background: #f3e6ef; overflow: hidden; width: min(320px, 80%); margin: 0 auto; }
-  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green-deep), var(--yellow-deep)); transition: width .4s ease; }
-
-  .garden { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  @media (max-width: 480px) { .garden { grid-template-columns: repeat(2, 1fr); } }
-
-  .clover-tile { perspective: 800px; height: 118px; cursor: pointer; }
-  .clover-inner {
-    position: relative; width: 100%; height: 100%; transition: transform .55s;
-    transform-style: preserve-3d;
+  /* ── 26 things ── */
+  .traits-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .traits-grid { grid-template-columns: 1fr; } }
+  .trait-card {
+    background: linear-gradient(150deg, #fff, #fff6ef);
+    border: 2px solid #ffe4f2;
+    border-radius: 14px; padding: 12px 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14px; line-height: 1.5;
   }
-  .clover-tile.flipped .clover-inner { transform: rotateY(180deg); }
-  .clover-face {
-    position: absolute; inset: 0; border-radius: 16px;
+  .trait-num {
+    flex: none; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--pink-deep); color: #fff; font-size: 12px; font-weight: 800;
     display: flex; align-items: center; justify-content: center;
-    backface-visibility: hidden; padding: 8px; text-align: center;
   }
-  .clover-front {
-    background: linear-gradient(150deg, var(--green), var(--yellow));
-    font-size: 34px;
-  }
-  .clover-front:hover { filter: brightness(1.05); }
-  .clover-back {
-    background: #fff; transform: rotateY(180deg);
-    font-size: 12.5px; font-weight: 700; color: var(--ink);
-    line-height: 1.4; box-shadow: inset 0 0 0 2px var(--pink);
-  }
+  .trait-text.placeholder { color: #c7a9bc; font-style: italic; }
 
-  /* ── Elephant surprise ── */
-  .reveal { text-align: center; display: none; }
-  .reveal.show { display: block; animation: popIn .5s ease; }
-  @keyframes popIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-  .elephant-big { font-size: 90px; display: inline-block; animation: bounceEl 1.4s ease-in-out infinite; }
-  @keyframes bounceEl { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
-  .reveal h3 { color: var(--pink-deep); font-size: clamp(20px, 5vw, 28px); font-weight: 900; margin: 10px 0 6px; }
-  .reveal p { color: #6b5460; font-size: 15px; line-height: 1.7; }
+  /* ── mini game ── */
+  .progress-wrap { text-align: center; margin-bottom: 20px; }
+  .progress-label { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .progress-bar { height: 10px; border-radius: 999px; background: #f3e6ef; overflow: hidden; width: min(300px, 80%); margin: 0 auto; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green-deep), var(--yellow-deep)); transition: width .4s ease; }
+  .garden { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 480px) { .garden { grid-template-columns: repeat(2, 1fr); } }
+  .clover-tile { perspective: 800px; height: 108px; cursor: pointer; }
+  .clover-inner { position: relative; width: 100%; height: 100%; transition: transform .55s; transform-style: preserve-3d; }
+  .clover-tile.flipped .clover-inner { transform: rotateY(180deg); }
+  .clover-face { position: absolute; inset: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; padding: 8px; text-align: center; }
+  .clover-front { background: linear-gradient(150deg, var(--green), var(--yellow)); font-size: 30px; }
+  .clover-back { background: #fff; transform: rotateY(180deg); font-size: 11.5px; font-weight: 700; line-height: 1.35; box-shadow: inset 0 0 0 2px var(--pink); }
+  .elephant-reveal { text-align: center; margin-top: 24px; display: none; }
+  .elephant-reveal.show { display: block; animation: pop .5s ease; }
+  .elephant-big { font-size: 70px; display: inline-block; animation: bounceEl 1.4s ease-in-out infinite; }
+  @keyframes bounceEl { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
 
-  /* ── Gallery ── */
-  .gallery { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-  .frame {
-    width: 170px; height: 210px; border-radius: 14px;
-    background: linear-gradient(160deg, var(--pink), var(--yellow));
-    padding: 10px; box-shadow: 0 10px 26px rgba(0,0,0,.12);
-    transform: rotate(var(--rot)); transition: transform .2s;
-    display: flex; align-items: center; justify-content: center; text-align: center;
+  /* ── quiz ── */
+  .quiz-q { margin-bottom: 22px; }
+  .quiz-q .qtext { font-weight: 800; margin-bottom: 10px; font-size: 15px; }
+  .quiz-opts { display: grid; gap: 8px; }
+  .quiz-opt {
+    text-align: left; padding: 11px 14px; border-radius: 12px; border: 2px solid #f3e0ec;
+    background: #fff; cursor: pointer; font-size: 14px; transition: border-color .15s, background .15s;
   }
-  .frame:hover { transform: rotate(0deg) scale(1.05); }
-  .frame .placeholder { font-size: 13px; color: #7a5a68; font-weight: 700; padding: 10px; }
-  .frame .placeholder .icon { font-size: 30px; display: block; margin-bottom: 8px; }
+  .quiz-opt:hover { border-color: var(--pink); }
+  .quiz-opt.correct { border-color: var(--green-deep); background: #eafbe8; }
+  .quiz-opt.wrong { border-color: #e88; background: #fdeaea; }
+  .quiz-opt.disabledOpt { pointer-events: none; }
+  .quiz-result { text-align: center; font-weight: 800; color: var(--pink-deep); margin-top: 6px; font-size: 16px; }
 
-  /* ── Letter ── */
-  .letter-wrap { text-align: center; position: relative; }
-  .lock-overlay {
-    padding: 30px 10px; color: #8a7288; font-size: 14.5px;
-  }
-  .lock-emoji { font-size: 38px; display: block; margin-bottom: 10px; }
-  .envelope { width: 210px; height: 145px; margin: 10px auto 0; position: relative; cursor: pointer; }
+  /* ── words from people ── */
+  .words-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 480px) { .words-grid { grid-template-columns: 1fr; } }
+  .word-card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.06); }
+  .word-name { font-weight: 800; color: var(--pink-deep); font-size: 14px; margin-bottom: 6px; }
+  .word-msg { font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+  .word-msg.placeholder { color: #c7a9bc; font-style: italic; }
+
+  /* ── letter ── */
+  .envelope { width: 200px; height: 138px; margin: 16px auto 0; position: relative; cursor: pointer; }
   .env-body { position: absolute; inset: 0; background: linear-gradient(135deg, var(--pink-deep), var(--yellow-deep)); border-radius: 10px; }
-  .env-flap {
-    position: absolute; top: 0; left: 0; width: 100%; height: 74px;
-    background: linear-gradient(135deg, var(--green-deep), var(--pink-deep));
-    clip-path: polygon(0 0, 100% 0, 50% 85%);
-    transform-origin: top; transition: transform .5s ease; border-radius: 10px 10px 0 0;
-  }
+  .env-flap { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(135deg, var(--green-deep), var(--pink-deep)); clip-path: polygon(0 0, 100% 0, 50% 85%); transform-origin: top; transition: transform .5s ease; border-radius: 10px 10px 0 0; }
   .envelope.open .env-flap { transform: rotateX(180deg); }
-  .env-icon { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 28px; }
-  .env-hint { margin-top: 12px; font-size: 13px; color: #a98da0; }
-  .letter-body { display: none; text-align: left; margin-top: 22px; white-space: pre-line; line-height: 1.85; font-size: 15.5px; }
-  .letter-body.show { display: block; animation: popIn .5s ease; }
-  .letter-sig { margin-top: 16px; font-weight: 800; color: var(--pink-deep); text-align: right; display: none; }
+  .env-icon { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 26px; }
+  .env-hint { margin-top: 12px; font-size: 13px; color: var(--muted); text-align: center; }
+  .letter-body { display: none; text-align: left; margin-top: 20px; white-space: pre-line; line-height: 1.85; font-size: 15px; }
+  .letter-body.show { display: block; animation: pop .5s ease; }
+  .letter-sig { margin-top: 14px; font-weight: 800; color: var(--pink-deep); text-align: right; display: none; }
 
-  footer { text-align: center; padding: 36px 20px 12px; color: #a98da0; font-size: 13px; position: relative; z-index: 1; }
+  /* ── make a wish ── */
+  .cake-wrap { text-align: center; }
+  .cake { font-size: 60px; }
+  .candles { display: flex; justify-content: center; gap: 10px; margin-bottom: -4px; }
+  .candle { font-size: 30px; cursor: pointer; transition: transform .15s; user-select: none; }
+  .candle:hover { transform: scale(1.15); }
+  .wish-box { margin-top: 22px; display: none; }
+  .wish-box.show { display: block; animation: pop .5s ease; }
+  textarea.wish-input {
+    width: 100%; min-height: 90px; border-radius: 14px; border: 2px solid #f3e0ec;
+    padding: 12px 14px; font-family: inherit; font-size: 14.5px; resize: vertical;
+  }
+  .wish-sent { display: none; text-align: center; margin-top: 14px; color: var(--pink-deep); font-weight: 800; }
+
+  /* ── final ── */
+  .final-emojis { font-size: 50px; text-align: center; margin-bottom: 6px; }
+
+  footer { text-align: center; padding: 30px 20px 10px; color: var(--muted); font-size: 13px; position: relative; z-index: 1; }
 </style>
 </head>
 <body>
 
 <div class="floaters" id="floaters"></div>
 <canvas id="confettiCanvas"></canvas>
+<div class="progress-dots" id="progressDots"></div>
 
-<!-- ═══ HERO ═══ -->
-<section class="hero">
-  <div class="hero-badge">🍀 ŞANSLI GÜN YAKLAŞIYOR 🍀</div>
-  <div class="mascot">🐘</div>
-  <h1>İyi ki doğdun<br>Polen!</h1>
-  <p class="sub">Sevdiğin o pastel renkler, uğur getiren yoncalar ve görmek istediğin o şirin fil için sana özel bir bahçe hazırladım. Hazırsan aşağı in ve bahçeni keşfet 🌸</p>
+<div class="stage">
 
-  <div class="countdown" id="countdown">
-    <div class="cd-box"><div class="cd-num" id="cd-days">--</div><div class="cd-label">gün</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">saat</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">dakika</div></div>
-    <div class="cd-box"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">saniye</div></div>
-  </div>
-  <div id="celebrateMsg">🎉 BUGÜN SENİN GÜNÜN, POLEN! 🎉</div>
+  <!-- 1. BIRTHDAY INTRO -->
+  <div class="screen active" id="screen-0">
+    <div class="card center">
+      <div class="eyebrow">🍀 ŞANSLI GÜN YAKLAŞIYOR 🍀</div>
+      <div class="mascot">🐘</div>
+      <h1>İyi ki doğdun<br>Polen!</h1>
+      <p class="sub">Sana pastel renklerle, biraz şansla ve birkaç sürprizle dolu küçük bir doğum günü deneyimi hazırladım. Hazır olduğunda başlayalım 🌸</p>
 
-  <button class="btn" id="confettiBtn">🎊 Konfeti Patlat</button>
-</section>
+      <div class="countdown" id="countdown">
+        <div class="cd-box"><div class="cd-num" id="cd-days">--</div><div class="cd-label">gün</div></div>
+        <div class="cd-box"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">saat</div></div>
+        <div class="cd-box"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">dakika</div></div>
+        <div class="cd-box"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">saniye</div></div>
+      </div>
+      <div id="celebrateMsg">🎉 BUGÜN SENİN GÜNÜN, POLEN! 🎉</div>
 
-<!-- ═══ CLOVER GARDEN GAME ═══ -->
-<section>
-  <div class="card">
-    <div class="sec-title">Şanslı Yonca Bahçesi 🍀</div>
-    <div class="sec-sub">Yoncalara tıkla, her biri sana bir dilek getirsin</div>
-
-    <div class="progress-wrap">
-      <div class="progress-label"><span id="foundCount">0</span> / 8 yonca bulundu</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="nav-row" style="justify-content:center">
+        <button class="btn btn-primary" onclick="goTo(1)">Başlayalım 🎈</button>
+      </div>
     </div>
-
-    <div class="garden" id="garden"></div>
   </div>
-</section>
 
-<!-- ═══ ELEPHANT SURPRISE (unlocks after garden) ═══ -->
-<section>
-  <div class="card reveal" id="revealCard">
-    <div class="elephant-big">🐘</div>
-    <h3>Şansın seni bir fil sürprizine getirdi!</h3>
-    <p>Gerçek bir fili şimdilik bu ekrandan sana getiremesem de, en sevdiğin hayvanı düşünürken hep gülümsediğini biliyorum. Umarım bir gün gerçekten karşı karşıya gelirsiniz — o güne kadar bu minik dostun seni doğum gününde selamlıyor 💛🐘💚</p>
-  </div>
-</section>
-
-<!-- ═══ GALLERY ═══ -->
-<section>
-  <div class="sec-title">Anılarımız İçin Bir Köşe 📸</div>
-  <div class="sec-sub">Fotoğraflarını eklemen için hazır çerçeveler</div>
-  <div class="gallery">
-    <div class="frame" style="--rot:-4deg"><div class="placeholder"><span class="icon">🌸</span>fotoğraf buraya gelecek</div></div>
-    <div class="frame" style="--rot:3deg"><div class="placeholder"><span class="icon">🍀</span>fotoğraf buraya gelecek</div></div>
-    <div class="frame" style="--rot:-2deg"><div class="placeholder"><span class="icon">🐘</span>fotoğraf buraya gelecek</div></div>
-    <div class="frame" style="--rot:4deg"><div class="placeholder"><span class="icon">💛</span>fotoğraf buraya gelecek</div></div>
-  </div>
-</section>
-
-<!-- ═══ LETTER (locked until garden complete) ═══ -->
-<section>
-  <div class="card letter-wrap">
-    <div class="sec-title">Sana Bir Mektup 💌</div>
-
-    <div id="lockOverlay" class="lock-overlay">
-      <span class="lock-emoji">🔒</span>
-      Bu mektup, bahçedeki 8 yoncayı da bulunca açılacak. Hadi yukarı çık ve şansını dene! 🍀
+  <!-- 2. 26 THINGS THAT MAKE YOU, YOU -->
+  <div class="screen" id="screen-1">
+    <div class="card">
+      <h2>26 Things That Make You, You</h2>
+      <div class="sec-sub">26 yaşına giren Polen'i Polen yapan 26 şey ✦</div>
+      <div class="traits-grid" id="traitsGrid"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(0)">← Geri</button>
+        <button class="btn btn-primary" onclick="goTo(2)">İleri →</button>
+      </div>
     </div>
+  </div>
 
-    <div id="envelopeWrap" style="display:none">
-      <div class="sec-sub">Zarfa tıkla ve aç</div>
+  <!-- 3. MINI GAME -->
+  <div class="screen" id="screen-2">
+    <div class="card">
+      <h2>Mini Game</h2>
+      <div class="sec-sub">Şanslı yoncalara tıkla, hepsini bul 🍀</div>
+
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="foundCount">0</span> / 8 yonca bulundu</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="garden" id="garden"></div>
+
+      <div class="elephant-reveal" id="elephantReveal">
+        <div class="elephant-big">🐘</div>
+        <p class="sub" style="margin-top:6px">Tüm yoncaları buldun, şansın seni bir fil sürprizine getirdi! Umarım bir gün gerçekten bir file de bu kadar kolay rastlarsın 💛</p>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Geri</button>
+        <button class="btn btn-primary" id="gameNextBtn" disabled onclick="goTo(3)">İleri →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. QUIZ -->
+  <div class="screen" id="screen-3">
+    <div class="card">
+      <h2>Quiz</h2>
+      <div class="sec-sub">Eğlencesine birkaç soru 🎯</div>
+      <div id="quizWrap"></div>
+      <div class="quiz-result" id="quizResult"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Geri</button>
+        <button class="btn btn-primary" id="quizNextBtn" disabled onclick="goTo(4)">İleri →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. A FEW WORDS FROM YOUR PEOPLE -->
+  <div class="screen" id="screen-4">
+    <div class="card">
+      <h2>A Few Words From Your People</h2>
+      <div class="sec-sub">Seni sevenlerden küçük notlar 💛</div>
+      <div class="words-grid" id="wordsGrid"></div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Geri</button>
+        <button class="btn btn-primary" onclick="goTo(5)">İleri →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. BIRTHDAY LETTER -->
+  <div class="screen" id="screen-5">
+    <div class="card center">
+      <h2>Birthday Letter</h2>
+      <div class="sec-sub">Zarfa tıkla ve aç 💌</div>
+
       <div class="envelope" id="envelope">
         <div class="env-body"></div>
         <div class="env-flap"></div>
         <div class="env-icon">💌</div>
       </div>
       <div class="env-hint" id="envHint">👆 Zarfa tıkla</div>
+
       <div class="letter-body" id="letterBody">Sevgili Polen,
 
 Bugün senin günün ve sana pembe, sarı, yeşil rengin en açık ve en güzel tonlarından bir doğum günü hazırlamak istedim. Çünkü sen hayatıma her zaman böyle aydınlık bir enerjiyle dokunuyorsun.
@@ -245,14 +303,56 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
 
 Şimdilik bilmeni istediğim tek şey var: iyi ki doğdun, iyi ki varsın. Seni çok seviyorum.</div>
       <div class="letter-sig" id="letterSig">— Barış</div>
+
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Geri</button>
+        <button class="btn btn-primary" onclick="goTo(6)">İleri →</button>
+      </div>
     </div>
   </div>
-</section>
+
+  <!-- 7. MAKE A WISH -->
+  <div class="screen" id="screen-6">
+    <div class="card cake-wrap">
+      <h2>Make a Wish</h2>
+      <div class="sec-sub">Mumları üfle, sonra dileğini tut 🕯️</div>
+
+      <div class="candles" id="candles"></div>
+      <div class="cake">🎂</div>
+
+      <div class="wish-box" id="wishBox">
+        <p class="sub">Hepsini söndürdün! Şimdi aklından geçen dileği aşağıya yaz — bu sadece senin sırrın, kimseyle paylaşılmayacak 🤫</p>
+        <textarea class="wish-input" id="wishInput" placeholder="Dileğim..."></textarea>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="sendWish()">Dileğimi Tuttum ✨</button>
+        <div class="wish-sent" id="wishSent">Dileğin uçtu gitti, gerçekleşmesi umuduyla 🎈</div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-ghost" onclick="goTo(5)">← Geri</button>
+        <button class="btn btn-primary" onclick="goTo(7)">İleri →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. FINAL SCREEN -->
+  <div class="screen" id="screen-7">
+    <div class="card center">
+      <div class="final-emojis">🎉🐘🍀💛</div>
+      <h1>İyi ki Doğdun<br>Polen!</h1>
+      <p class="sub">26 yaşın; şansın, gülüşün ve sevdiğin o açık renkler kadar güzel geçsin. Bu küçük site, seni ne kadar çok düşündüğümün minik bir kanıtı sadece 💕</p>
+      <div class="nav-row" style="justify-content:center; gap:14px">
+        <button class="btn btn-ghost" onclick="goTo(6)">← Geri</button>
+        <button class="btn btn-primary" onclick="goTo(0)">Baştan İzle 🔄</button>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <footer>Polen için sevgiyle hazırlandı 🍀🐘💛</footer>
 
 <script>
-  // floating pastel elements
+  /* ══════════════ decorative floaters ══════════════ */
   const floatEmojis = ["🍀","🌸","💛","🌿","✨"];
   const floatWrap = document.getElementById("floaters");
   for (let i = 0; i < 12; i++) {
@@ -265,41 +365,77 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     floatWrap.appendChild(f);
   }
 
-  // countdown -> 5 Eylül 2026 00:00 (local time)
-  const target = new Date(2026, 8, 5, 0, 0, 0);
-  const countdownEl = document.getElementById("countdown");
-  const celebrateEl = document.getElementById("celebrateMsg");
-
-  function tick() {
-    const now = new Date();
-    const diff = target - now;
-    if (diff <= 0) {
-      countdownEl.style.display = "none";
-      celebrateEl.style.display = "block";
-      return true;
-    }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById("cd-days").textContent = d;
-    document.getElementById("cd-hours").textContent = String(h).padStart(2, "0");
-    document.getElementById("cd-mins").textContent = String(m).padStart(2, "0");
-    document.getElementById("cd-secs").textContent = String(s).padStart(2, "0");
-    return false;
-  }
-  const isBirthday = tick();
-  const timer = setInterval(() => { if (tick()) clearInterval(timer); }, 1000);
-
   function burstConfetti() {
     confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
     setTimeout(() => confetti({ particleCount: 90, angle: 60, spread: 70, origin: { x: 0 } }), 200);
     setTimeout(() => confetti({ particleCount: 90, angle: 120, spread: 70, origin: { x: 1 } }), 200);
   }
-  document.getElementById("confettiBtn").addEventListener("click", burstConfetti);
+
+  /* ══════════════ screen navigation ══════════════ */
+  const screenIds = ["screen-0","screen-1","screen-2","screen-3","screen-4","screen-5","screen-6","screen-7"];
+  let current = 0;
+
+  const dotsWrap = document.getElementById("progressDots");
+  screenIds.forEach((id, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === 0 ? " active" : "");
+    d.addEventListener("click", () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+
+  function goTo(i) {
+    document.getElementById(screenIds[current]).classList.remove("active");
+    current = i;
+    document.getElementById(screenIds[current]).classList.add("active");
+    [...dotsWrap.children].forEach((d, idx) => {
+      d.classList.toggle("active", idx === current);
+      d.classList.toggle("done", idx < current);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ══════════════ 1. countdown ══════════════ */
+  const target = new Date(2026, 8, 5, 0, 0, 0);
+  const countdownEl = document.getElementById("countdown");
+  const celebrateEl = document.getElementById("celebrateMsg");
+  function tick() {
+    const diff = target - new Date();
+    if (diff <= 0) {
+      countdownEl.style.display = "none";
+      celebrateEl.style.display = "block";
+      return true;
+    }
+    document.getElementById("cd-days").textContent = Math.floor(diff / 86400000);
+    document.getElementById("cd-hours").textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, "0");
+    document.getElementById("cd-mins").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    document.getElementById("cd-secs").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    return false;
+  }
+  const isBirthday = tick();
+  const cdTimer = setInterval(() => { if (tick()) clearInterval(cdTimer); }, 1000);
   if (isBirthday) burstConfetti();
 
-  // ── clover garden game ──
+  /* ══════════════ 2. 26 things — EDIT THIS LIST ══════════════
+     Fill in as many of the 26 items as you like; anything left
+     empty shows as a placeholder card until you add the real text. */
+  const traits = [
+    "Açık, pastel renkleri (pembe, sarı, yeşil) çok seviyor 🌸",
+    "En çok görmek istediği hayvan bir fil 🐘",
+    "Dört yapraklı yoncanın uğur getirdiğine inanıyor 🍀",
+    "", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "", "", "",
+    "", ""
+  ];
+  const traitsGrid = document.getElementById("traitsGrid");
+  traits.forEach((text, i) => {
+    const card = document.createElement("div");
+    card.className = "trait-card";
+    const isEmpty = !text.trim();
+    card.innerHTML = `<div class="trait-num">${i + 1}</div><div class="trait-text${isEmpty ? " placeholder" : ""}">${isEmpty ? "buraya bir özellik gelecek ✏️" : text}</div>`;
+    traitsGrid.appendChild(card);
+  });
+
+  /* ══════════════ 3. mini game — clover garden ══════════════ */
   const wishes = [
     "Bu yeni yaşında yüzündeki gülümseme hiç eksik olmasın 😊",
     "Sevdiğin o pastel renkler kadar güzel günler seni bekliyor 🌸",
@@ -310,49 +446,118 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     "Yanında olmak beni her zaman şanslı hissettiriyor 🍀",
     "İyi ki doğdun Polen, iyi ki varsın 💚"
   ];
-
   const garden = document.getElementById("garden");
   const foundCountEl = document.getElementById("foundCount");
   const progressFill = document.getElementById("progressFill");
+  const gameNextBtn = document.getElementById("gameNextBtn");
   let found = 0;
-
-  wishes.forEach((wish, i) => {
+  wishes.forEach((wish) => {
     const tile = document.createElement("div");
     tile.className = "clover-tile";
-    tile.innerHTML = `
-      <div class="clover-inner">
-        <div class="clover-face clover-front">🍀</div>
-        <div class="clover-face clover-back">${wish}</div>
-      </div>`;
+    tile.innerHTML = `<div class="clover-inner"><div class="clover-face clover-front">🍀</div><div class="clover-face clover-back">${wish}</div></div>`;
     tile.addEventListener("click", () => {
       if (tile.classList.contains("flipped")) return;
       tile.classList.add("flipped");
       found++;
       foundCountEl.textContent = found;
       progressFill.style.width = (found / wishes.length * 100) + "%";
-      confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
+      confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
       if (found === wishes.length) {
-        setTimeout(unlockEverything, 500);
+        document.getElementById("elephantReveal").classList.add("show");
+        gameNextBtn.disabled = false;
+        setTimeout(burstConfetti, 300);
       }
     });
     garden.appendChild(tile);
   });
 
-  function unlockEverything() {
-    document.getElementById("revealCard").classList.add("show");
-    document.getElementById("lockOverlay").style.display = "none";
-    document.getElementById("envelopeWrap").style.display = "block";
-    burstConfetti();
-  }
+  /* ══════════════ 4. quiz ══════════════ */
+  const quiz = [
+    { q: "Polen bu yıl kaç yaşına giriyor?", opts: ["24", "25", "26", "27"], a: 2 },
+    { q: "Fillerin hafızasıyla ilgili hangisi doğru?", opts: ["Çok kısa sürede unuturlar", "Yıllarca hatırlayabilirler", "Hiç hatırlamazlar", "Sadece kokuları hatırlarlar"], a: 1 },
+    { q: "Bu sitedeki bahçede kaç tane şanslı yonca vardı?", opts: ["5", "6", "8", "10"], a: 2 },
+    { q: "Dört yapraklı yonca bulmak genelde nasıldır?", opts: ["Çok sık rastlanır", "Oldukça nadirdir", "Hiç bulunmaz", "Sadece kışın çıkar"], a: 1 }
+  ];
+  const quizWrap = document.getElementById("quizWrap");
+  const quizResult = document.getElementById("quizResult");
+  const quizNextBtn = document.getElementById("quizNextBtn");
+  let answered = 0, correct = 0;
+  quiz.forEach((item, qi) => {
+    const qDiv = document.createElement("div");
+    qDiv.className = "quiz-q";
+    qDiv.innerHTML = `<div class="qtext">${qi + 1}. ${item.q}</div><div class="quiz-opts"></div>`;
+    const optsDiv = qDiv.querySelector(".quiz-opts");
+    item.opts.forEach((opt, oi) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "quiz-opt";
+      b.textContent = opt;
+      b.addEventListener("click", () => {
+        [...optsDiv.children].forEach(c => c.classList.add("disabledOpt"));
+        if (oi === item.a) { b.classList.add("correct"); correct++; }
+        else { b.classList.add("wrong"); optsDiv.children[item.a].classList.add("correct"); }
+        answered++;
+        if (answered === quiz.length) {
+          quizResult.textContent = `${correct} / ${quiz.length} doğru! Kaç doğru bilirsen bil, bugün zaten kazanan sensin Polen 🎉`;
+          quizNextBtn.disabled = false;
+        }
+      });
+      optsDiv.appendChild(b);
+    });
+    quizWrap.appendChild(qDiv);
+  });
 
-  // envelope
+  /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
+     Replace name/message with the real notes once you collect them. */
+  const friendMessages = [
+    { name: "", message: "" },
+    { name: "", message: "" },
+    { name: "", message: "" },
+    { name: "", message: "" }
+  ];
+  const wordsGrid = document.getElementById("wordsGrid");
+  friendMessages.forEach((fm) => {
+    const card = document.createElement("div");
+    card.className = "word-card";
+    const hasContent = fm.name.trim() || fm.message.trim();
+    card.innerHTML = hasContent
+      ? `<div class="word-name">${fm.name}</div><div class="word-msg">${fm.message}</div>`
+      : `<div class="word-name">İsim buraya</div><div class="word-msg placeholder">mesaj buraya gelecek ✏️</div>`;
+    wordsGrid.appendChild(card);
+  });
+
+  /* ══════════════ 6. letter ══════════════ */
   const envelope = document.getElementById("envelope");
-  envelope?.addEventListener("click", () => {
+  envelope.addEventListener("click", () => {
     envelope.classList.add("open");
     document.getElementById("letterBody").classList.add("show");
     document.getElementById("letterSig").style.display = "block";
     document.getElementById("envHint").style.display = "none";
   });
+
+  /* ══════════════ 7. make a wish ══════════════ */
+  const candlesWrap = document.getElementById("candles");
+  const wishBox = document.getElementById("wishBox");
+  let candlesLeft = 5;
+  for (let i = 0; i < 5; i++) {
+    const c = document.createElement("span");
+    c.className = "candle";
+    c.textContent = "🕯️";
+    c.addEventListener("click", () => {
+      if (c.textContent === "💨") return;
+      c.textContent = "💨";
+      candlesLeft--;
+      if (candlesLeft === 0) {
+        wishBox.classList.add("show");
+        burstConfetti();
+      }
+    });
+    candlesWrap.appendChild(c);
+  }
+  function sendWish() {
+    document.getElementById("wishSent").style.display = "block";
+    burstConfetti();
+  }
 </script>
 
 </body>
