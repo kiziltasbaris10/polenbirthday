@@ -28,7 +28,32 @@
     overflow-x: hidden;
   }
 
-  #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+  #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10002; }
+
+  /* ── intro message (after studio splash) ── */
+  #introMsg {
+    position: fixed; inset: 0; z-index: 10000;
+    background: linear-gradient(160deg, #fff7e0 0%, #ffe4f2 45%, #e3f7de 100%);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px; transition: opacity .8s ease;
+  }
+  #introMsg.show { display: flex; }
+  #introMsg.hide { opacity: 0; pointer-events: none; }
+  #introMsg .im-line {
+    font-size: clamp(16px, 4vw, 21px); color: var(--ink); line-height: 1.6;
+    max-width: 560px; margin-bottom: 14px; opacity: 0; transform: translateY(10px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  #introMsg .im-line.wave { opacity: 1; transform: translateY(0); }
+  #introMsg .im-final {
+    font-size: clamp(24px, 6.5vw, 38px); font-weight: 900; margin-top: 6px;
+    background: linear-gradient(90deg, var(--pink-deep), var(--yellow-deep), var(--green-deep));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #introMsg .im-continue {
+    margin-top: 26px; opacity: 0; pointer-events: none; transition: opacity .6s ease;
+  }
+  #introMsg .im-continue.show { opacity: 1; pointer-events: auto; }
 
   /* ── studio presents splash ── */
   #splash {
@@ -247,6 +272,14 @@
   <div class="skip-hint">devam etmek için dokun</div>
 </div>
 
+<div id="introMsg">
+  <div class="im-line" id="imL1">Hey Polen 👋</div>
+  <div class="im-line" id="imL2">Bu sayfa, seni çok seven erkek arkadaşın tarafından günlerce çalışılarak hazırlanmıştır.</div>
+  <div class="im-line" id="imL3">Kemerini bağla... uykun var biliyorum ama bugün uyuma günü değil,</div>
+  <div class="im-line im-final" id="imL4">çünkü bugün senin doğum günün! 🎉</div>
+  <button class="btn btn-primary im-continue" id="imContinueBtn">Devam Et →</button>
+</div>
+
 <div class="floaters" id="floaters"></div>
 <canvas id="confettiCanvas"></canvas>
 <div class="progress-dots" id="progressDots"></div>
@@ -417,10 +450,53 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     if (splashHidden) return;
     splashHidden = true;
     splash.classList.add("hide");
-    setTimeout(() => { splash.style.display = "none"; }, 850);
+    setTimeout(() => { splash.style.display = "none"; showIntroMsg(); }, 850);
   }
   splash.addEventListener("click", hideSplash);
   setTimeout(hideSplash, 4200);
+
+  /* ══════════════ intro message + mega celebration ══════════════ */
+  function megaCelebration() {
+    const bear = confetti.shapeFromText({ text: "🧸", scalar: 2.2 });
+    const elephant = confetti.shapeFromText({ text: "🐘", scalar: 2.2 });
+    confetti({ particleCount: 40, spread: 110, origin: { y: 0.5 }, shapes: [bear, elephant], scalar: 2.2 });
+    confetti({ particleCount: 160, spread: 130, origin: { y: 0.55 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
+    let bursts = 0;
+    const fw = setInterval(() => {
+      confetti({
+        particleCount: 45, startVelocity: 32, spread: 360,
+        origin: { x: Math.random(), y: 0.2 + Math.random() * 0.4 },
+        colors: ["#ff85c2", "#ffca3a", "#7fd67a", "#ffffff"]
+      });
+      bursts++;
+      if (bursts >= 6) clearInterval(fw);
+    }, 320);
+  }
+
+  const introMsg = document.getElementById("introMsg");
+  const imContinueBtn = document.getElementById("imContinueBtn");
+  let introMsgDone = false;
+  function showIntroMsg() {
+    introMsg.classList.add("show");
+    const lines = ["imL1", "imL2", "imL3", "imL4"];
+    lines.forEach((id, i) => {
+      setTimeout(() => {
+        document.getElementById(id).classList.add("wave");
+        if (id === "imL4") {
+          megaCelebration();
+          setTimeout(() => imContinueBtn.classList.add("show"), 500);
+          setTimeout(hideIntroMsg, 6000);
+        }
+      }, 500 + i * 1500);
+    });
+  }
+  function hideIntroMsg() {
+    if (introMsgDone) return;
+    introMsgDone = true;
+    introMsg.classList.add("hide");
+    setTimeout(() => { introMsg.style.display = "none"; }, 850);
+  }
+  imContinueBtn.addEventListener("click", hideIntroMsg);
 
   /* ══════════════ decorative floaters ══════════════ */
   const floatEmojis = ["🍀","🌸","💛","🌿","✨"];
