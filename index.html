@@ -587,6 +587,23 @@
   .candle.out { animation: none; transform: scale(.85); opacity: .8; }
   @keyframes candleWiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
   #blowCandlesBtn:disabled { opacity: .5; cursor: not-allowed; }
+  /* draws the eye to the button so it's obvious what to do, even for a
+     first-time visitor who's never seen this site before */
+  #blowCandlesBtn:not(:disabled) { animation: blowBtnShake 2.6s ease-in-out infinite; }
+  @keyframes blowBtnShake {
+    0%, 62%, 100% { transform: translateX(0) rotate(0deg); }
+    65% { transform: translateX(-4px) rotate(-3deg); }
+    70% { transform: translateX(4px) rotate(3deg); }
+    75% { transform: translateX(-4px) rotate(-3deg); }
+    80% { transform: translateX(4px) rotate(3deg); }
+    85% { transform: translateX(-2px) rotate(-1deg); }
+    90% { transform: translateX(2px) rotate(1deg); }
+  }
+  .blow-hint {
+    margin-top: 8px; font-size: 13px; font-weight: 800; color: var(--pink-deep);
+    animation: blowHintBounce 1.3s ease-in-out infinite;
+  }
+  @keyframes blowHintBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   .blow-status { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 8px; min-height: 18px; }
   .wish-box { margin-top: 22px; }
   textarea.wish-input {
@@ -874,6 +891,7 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
       <div class="candles" id="candles"></div>
       <div class="cake">🎂</div>
       <button class="btn btn-primary" id="blowCandlesBtn" style="margin-top:14px">Mumları Üfle 🌬️</button>
+      <div class="blow-hint" id="blowHint">☝️ Hadi tıkla artık, bekliyoruz! 😄</div>
       <div class="blow-status" id="blowStatus"></div>
 
       <div class="wish-box" id="wishBox">
@@ -904,8 +922,10 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     <div class="final-chaos" id="finalChaos"></div>
     <div class="card center">
       <div class="final-emojis">🎉🐘🍀💛</div>
-      <h1>İyi ki Doğdun<br>sevgilimmm</h1>
-      <p class="sub">26 yaşın; şansın, gülüşün ve sevdiğin o açık renkler kadar güzel geçsin. Bu küçük site, seni ne kadar çok düşündüğümün minik bir kanıtı sadece 💕</p>
+      <h1>İyi ki doğdun<br>Sevgilimmmm</h1>
+      <p class="sub">26 yaşın; bol kahkahalı, huzurlu, şanslı ve hayalini kurduğun her şeye biraz daha yaklaştığın bir yıl olsun.</p>
+      <p class="sub">Bugün burada gördüğün her şeyin tek bir amacı vardı: sana ne kadar özel olduğunu bir kez daha hatırlatmak.</p>
+      <p class="sub">İyi ki doğdun sevgilim. 💕</p>
       <div class="nav-row" style="justify-content:center; gap:14px">
         <button class="btn btn-ghost" onclick="goTo(6)">← Geri</button>
         <button class="btn btn-primary" onclick="goTo(0)">Baştan İzle 🔄</button>
@@ -2161,6 +2181,7 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
 
   blowBtn.addEventListener("click", () => {
     blowBtn.disabled = true;
+    document.getElementById("blowHint").style.display = "none";
     let secondsLeft = 3;
     blowStatus.textContent = `Üflüyorsun... ${secondsLeft}`;
     const tick = setInterval(() => {
