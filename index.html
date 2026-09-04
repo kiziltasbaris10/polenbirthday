@@ -417,16 +417,56 @@
   .quiz-result { text-align: center; font-weight: 800; color: var(--pink-deep); margin-top: 6px; font-size: 16px; }
 
   /* ── words from people ── */
-  .words-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 480px) { .words-grid { grid-template-columns: 1fr; } }
-  .word-card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.06); }
-  .word-photo {
-    width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px;
-    margin-bottom: 10px; display: block;
+  /* each friend is a closed capsule; tapping it grows open into a letter-style
+     modal showing only that person's message + photos */
+  .people-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .people-capsule {
+    background: #fff; border: none; font: inherit; border-radius: 20px;
+    padding: 16px 10px; text-align: center; cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,.06); transition: transform .15s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
-  .word-name { font-weight: 800; color: var(--pink-deep); font-size: 14px; margin-bottom: 6px; }
-  .word-msg { font-size: 13.5px; line-height: 1.55; color: var(--ink); }
-  .word-msg.placeholder { color: #c7a9bc; font-style: italic; }
+  .people-capsule:hover { transform: translateY(-3px) scale(1.03); }
+  .people-capsule-icon { font-size: 28px; }
+  .people-capsule-name { font-weight: 800; color: var(--pink-deep); font-size: 14px; }
+  .people-capsule-hint { font-size: 10.5px; color: var(--muted); }
+
+  .people-overlay {
+    position: fixed; inset: 0; z-index: 2000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(74,59,69,.55); backdrop-filter: blur(2px);
+    opacity: 0; transition: opacity .3s ease;
+  }
+  .people-overlay.show { display: flex; opacity: 1; }
+  .people-modal {
+    position: relative; width: min(480px, 100%); max-height: 84vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf0, #fff6ea);
+    border-radius: 20px; padding: 32px 24px 26px;
+    box-shadow: inset 0 0 0 1px #f3e0c8, 0 24px 60px rgba(0,0,0,.3);
+    transform: scale(.85); transition: transform .35s cubic-bezier(.34,1.5,.64,1);
+    font-family: 'Fraunces', 'Segoe UI', serif; text-align: left;
+  }
+  .people-overlay.show .people-modal { transform: scale(1); }
+  .people-modal::before {
+    content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 4px;
+    background: linear-gradient(90deg, var(--pink), var(--yellow), var(--green));
+    border-radius: 0 0 4px 4px;
+  }
+  .people-modal-close {
+    position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%;
+    background: #fff; border: none; box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--ink); z-index: 1;
+  }
+  .people-modal-name { font-size: 22px; font-weight: 900; color: var(--pink-deep); margin-bottom: 12px; }
+  .people-modal-message {
+    font-size: 15px; line-height: 1.75; color: var(--ink); white-space: pre-line; margin-bottom: 16px;
+  }
+  .people-modal-message.placeholder { color: #c7a9bc; font-style: italic; }
+  .people-modal-photos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .people-modal-photos.single { grid-template-columns: 1fr; }
+  .people-modal-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
+  .people-modal-photos.single img { aspect-ratio: 4/3; }
 
   /* ── letter ── */
   .envelope { width: 200px; height: 138px; margin: 16px auto 0; position: relative; cursor: pointer; }
@@ -546,6 +586,15 @@
   <div id="cdLabel">BAŞLIYORUZ! 🎉</div>
 </div>
 
+<div class="people-overlay" id="peopleOverlay">
+  <div class="people-modal" id="peopleModal">
+    <button class="people-modal-close" id="peopleModalClose" aria-label="Kapat">✕</button>
+    <div class="people-modal-name" id="peopleModalName"></div>
+    <div class="people-modal-message" id="peopleModalMessage"></div>
+    <div class="people-modal-photos" id="peopleModalPhotos"></div>
+  </div>
+</div>
+
 <div class="floaters" id="floaters"></div>
 <canvas id="confettiCanvas"></canvas>
 <div class="progress-dots" id="progressDots"></div>
@@ -657,8 +706,8 @@
   <div class="screen" id="screen-4">
     <div class="card">
       <h2>A Few Words From Your People</h2>
-      <div class="sec-sub">Seni sevenlerden küçük notlar 💛</div>
-      <div class="words-grid" id="wordsGrid"></div>
+      <div class="sec-sub">Bir kapsüle dokun, o kişinin notunu aç 💛</div>
+      <div class="people-grid" id="wordsGrid"></div>
       <div class="nav-row">
         <button class="btn btn-ghost" onclick="goTo(3)">← Geri</button>
         <button class="btn btn-primary" onclick="goTo(5)">İleri →</button>
@@ -1692,28 +1741,50 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   });
 
   /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
-     Fill in name/message/photo as each friend's note comes in. photo is a
-     path relative to index.html (e.g. "friends/pamir.jpg"); leave "" if
-     there's no photo yet. */
+     Fill in message/photos as each friend's note comes in. photos is an
+     array of paths relative to index.html (e.g. ["friends/pamir1.jpg",
+     "friends/pamir2.jpg"]) — as many as they sent, or [] if none yet. */
   const friendMessages = [
-    { name: "Pamir", message: "", photo: "" },
-    { name: "Yağmur", message: "", photo: "" },
-    { name: "Ceren", message: "", photo: "" },
-    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photo: "friends/jovana.jpg" },
-    { name: "Sofia", message: "", photo: "" }
+    { name: "Pamir", message: "", photos: [] },
+    { name: "Yağmur", message: "", photos: [] },
+    { name: "Ceren", message: "", photos: [] },
+    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photos: ["friends/jovana.jpg"] },
+    { name: "Sofia", message: "", photos: [] }
   ];
+
   const wordsGrid = document.getElementById("wordsGrid");
-  friendMessages.forEach((fm) => {
-    const card = document.createElement("div");
-    card.className = "word-card";
+  const peopleOverlay = document.getElementById("peopleOverlay");
+  const peopleModalName = document.getElementById("peopleModalName");
+  const peopleModalMessage = document.getElementById("peopleModalMessage");
+  const peopleModalPhotos = document.getElementById("peopleModalPhotos");
+  const peopleModalClose = document.getElementById("peopleModalClose");
+
+  function openPeopleModal(fm) {
+    peopleModalName.textContent = fm.name;
     const hasMessage = fm.message.trim();
-    const photoHtml = fm.photo ? `<img class="word-photo" src="${fm.photo}" alt="${fm.name}">` : "";
-    const nameHtml = `<div class="word-name">${fm.name}</div>`;
-    const msgHtml = hasMessage
-      ? `<div class="word-msg">${fm.message}</div>`
-      : `<div class="word-msg placeholder">mesaj buraya gelecek ✏️</div>`;
-    card.innerHTML = photoHtml + nameHtml + msgHtml;
-    wordsGrid.appendChild(card);
+    peopleModalMessage.textContent = hasMessage ? fm.message : "Notu henüz gelmedi, yakında burada olacak ✏️";
+    peopleModalMessage.classList.toggle("placeholder", !hasMessage);
+    peopleModalPhotos.innerHTML = "";
+    peopleModalPhotos.className = "people-modal-photos" + (fm.photos.length <= 1 ? " single" : "");
+    fm.photos.forEach((src) => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = fm.name;
+      peopleModalPhotos.appendChild(img);
+    });
+    peopleOverlay.classList.add("show");
+  }
+  function closePeopleModal() { peopleOverlay.classList.remove("show"); }
+  peopleModalClose.addEventListener("click", closePeopleModal);
+  peopleOverlay.addEventListener("click", (e) => { if (e.target === peopleOverlay) closePeopleModal(); });
+
+  friendMessages.forEach((fm) => {
+    const capsule = document.createElement("button");
+    capsule.type = "button";
+    capsule.className = "people-capsule";
+    capsule.innerHTML = `<span class="people-capsule-icon">💌</span><span class="people-capsule-name">${fm.name}</span><span class="people-capsule-hint">açmak için dokun</span>`;
+    capsule.addEventListener("click", () => openPeopleModal(fm));
+    wordsGrid.appendChild(capsule);
   });
 
   /* ══════════════ 6. letter ══════════════ */
