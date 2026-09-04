@@ -339,22 +339,63 @@
   }
   .trait-text.placeholder { color: #c7a9bc; font-style: italic; }
 
-  /* ── mini game ── */
-  .progress-wrap { text-align: center; margin-bottom: 20px; }
-  .progress-label { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-  .progress-bar { height: 10px; border-radius: 999px; background: #f3e6ef; overflow: hidden; width: min(300px, 80%); margin: 0 auto; }
-  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--green-deep), var(--yellow-deep)); transition: width .4s ease; }
-  .garden { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 480px) { .garden { grid-template-columns: repeat(2, 1fr); } }
-  .clover-tile { perspective: 800px; height: 108px; cursor: pointer; }
-  .clover-inner { position: relative; width: 100%; height: 100%; transition: transform .55s; transform-style: preserve-3d; }
-  .clover-tile.flipped .clover-inner { transform: rotateY(180deg); }
-  .clover-face { position: absolute; inset: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; padding: 8px; text-align: center; }
-  .clover-front { background: linear-gradient(150deg, var(--green), var(--yellow)); font-size: 30px; }
-  .clover-back { background: #fff; transform: rotateY(180deg); font-size: 11.5px; font-weight: 700; line-height: 1.35; box-shadow: inset 0 0 0 2px var(--pink); }
-  .elephant-reveal { text-align: center; margin-top: 24px; display: none; }
-  .elephant-reveal.show { display: block; animation: pop .5s ease; }
-  .elephant-big { font-size: 70px; display: inline-block; animation: bounceEl 1.4s ease-in-out infinite; }
+  /* ── mini game: platformer ── */
+  .pf-hud {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; font-size: 14px; font-weight: 800; color: var(--ink);
+  }
+  .pf-hud-item { background: #fff; border-radius: 999px; padding: 6px 14px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .pf-hud-hint { color: var(--muted); font-weight: 700; font-size: 12.5px; }
+
+  .pf-stage {
+    position: relative; width: 100%; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12); background: #bfe3f5; line-height: 0;
+  }
+  #pfCanvas { display: block; width: 100%; height: auto; touch-action: none; }
+
+  .pf-toast {
+    position: absolute; left: 50%; top: 14px; transform: translate(-50%, -14px);
+    background: #fff; color: var(--ink); font-weight: 800; font-size: 13px;
+    padding: 9px 16px; border-radius: 999px; box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+    white-space: nowrap; max-width: 90%; text-overflow: ellipsis; overflow: hidden;
+  }
+  .pf-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .pf-end {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(74, 59, 69, .55); backdrop-filter: blur(2px); opacity: 0; transition: opacity .4s ease;
+  }
+  .pf-end.show { display: flex; opacity: 1; }
+  .pf-end-card {
+    background: #fff; border-radius: 22px; padding: 26px 24px; text-align: center;
+    width: min(320px, 86%); box-shadow: 0 20px 50px rgba(0,0,0,.3);
+    transform: scale(.85); transition: transform .4s cubic-bezier(.34,1.5,.64,1);
+  }
+  .pf-end.show .pf-end-card { transform: scale(1); }
+  .pf-end-emoji { font-size: 44px; }
+  .pf-end-title { font-size: 22px; font-weight: 900; color: var(--pink-deep); margin-top: 6px; }
+  .pf-end-sub { font-size: 14px; color: var(--muted); margin: 8px 0 18px; }
+
+  .pf-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 14px; }
+  .pf-dpad { display: flex; gap: 10px; }
+  .pf-btn {
+    -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none;
+    border: none; border-radius: 18px; cursor: pointer;
+    background: linear-gradient(150deg, var(--pink), var(--yellow));
+    color: #fff; font-size: 22px; font-weight: 900;
+    width: 58px; height: 58px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 18px rgba(255,133,194,.3); transition: transform .1s ease;
+  }
+  .pf-btn:active { transform: scale(.92); }
+  .pf-jump {
+    width: auto; padding: 0 22px; font-size: 15px; letter-spacing: .5px;
+    background: linear-gradient(150deg, var(--green), var(--yellow-deep));
+  }
+  .pf-keys-hint { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  @media (hover: hover) and (pointer: fine) { .pf-controls { display: none; } }
+
+  body.game-scroll-lock { overflow: hidden; height: 100vh; }
   @keyframes bounceEl { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
 
   /* ── quiz ── */
@@ -519,23 +560,39 @@
   <div class="screen" id="screen-2">
     <div class="card">
       <h2>Mini Game</h2>
-      <div class="sec-sub">Şanslı yoncalara tıkla, hepsini bul 🍀</div>
+      <div class="sec-sub">Polen'in 26. Doğum Günü Macerası — çocukluktan bugüne kısa bir yolculuk 🎮</div>
 
-      <div class="progress-wrap">
-        <div class="progress-label"><span id="foundCount">0</span> / 8 yonca bulundu</div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="pf-hud">
+        <div class="pf-hud-item">🍀 <span id="pfCloverCount">0</span> / 6</div>
+        <div class="pf-hud-hint">Hedef: pastaya ulaş 🎂</div>
       </div>
 
-      <div class="garden" id="garden"></div>
+      <div class="pf-stage" id="pfStage">
+        <canvas id="pfCanvas"></canvas>
+        <div class="pf-toast" id="pfToast">Nope, birthdays don't have game overs 😄</div>
 
-      <div class="elephant-reveal" id="elephantReveal">
-        <div class="elephant-big">🐘</div>
-        <p class="sub" style="margin-top:6px">Tüm yoncaları buldun, şansın seni bir fil sürprizine getirdi! Umarım bir gün gerçekten bir file de bu kadar kolay rastlarsın 💛</p>
+        <div class="pf-end" id="pfEnd">
+          <div class="pf-end-card">
+            <div class="pf-end-emoji">🎂</div>
+            <div class="pf-end-title">You made it 🎂</div>
+            <div class="pf-end-sub">Welcome to Level 26, sevgilim.</div>
+            <button class="btn btn-primary" id="pfContinueBtn">Continue the Celebration →</button>
+          </div>
+        </div>
       </div>
+
+      <div class="pf-controls" id="pfControls">
+        <div class="pf-dpad">
+          <button class="pf-btn" id="pfLeftBtn" aria-label="Sola git">◀</button>
+          <button class="pf-btn" id="pfRightBtn" aria-label="Sağa git">▶</button>
+        </div>
+        <button class="pf-btn pf-jump" id="pfJumpBtn" aria-label="Zıpla">⤴ Zıpla</button>
+      </div>
+      <div class="pf-keys-hint">Klavye: ← → (veya A / D) hareket, Space veya ↑ zıpla</div>
 
       <div class="nav-row">
         <button class="btn btn-ghost" onclick="goTo(1)">← Geri</button>
-        <button class="btn btn-primary" id="gameNextBtn" disabled onclick="goTo(3)">İleri →</button>
+        <button class="btn btn-primary" onclick="goTo(3)">İleri →</button>
       </div>
     </div>
   </div>
@@ -875,6 +932,8 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       d.classList.toggle("active", idx === current);
       d.classList.toggle("done", idx < current);
     });
+    // safety net: leaving the mini game mid-touch should never leave page scroll locked
+    if (current !== 2) document.body.classList.remove("game-scroll-lock");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -899,47 +958,535 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     traitsGrid.appendChild(card);
   });
 
-  /* ══════════════ 3. mini game — clover garden ══════════════ */
-  const wishes = [
-    "Bu yeni yaşında yüzündeki gülümseme hiç eksik olmasın 😊",
-    "Sevdiğin o pastel renkler kadar güzel günler seni bekliyor 🌸",
-    "Şansın hep yonca kadar bol olsun 🍀",
-    "Hayalindeki o fili bir gün gerçekten göreceğine inanıyorum 🐘",
-    "Kalbinin her zaman bu kadar sıcak kalmasını diliyorum 💛",
-    "Bu yıl seni mutlu edecek küçük sürprizlerle dolsun ✨",
-    "Yanında olmak beni her zaman şanslı hissettiriyor 🍀",
-    "İyi ki doğdun Polen, iyi ki varsın 💚"
-  ];
-  const garden = document.getElementById("garden");
-  const foundCountEl = document.getElementById("foundCount");
-  const progressFill = document.getElementById("progressFill");
-  const gameNextBtn = document.getElementById("gameNextBtn");
-  let found = 0;
-  wishes.forEach((wish) => {
-    const tile = document.createElement("div");
-    tile.className = "clover-tile";
-    tile.innerHTML = `<div class="clover-inner"><div class="clover-face clover-front">🍀</div><div class="clover-face clover-back">${wish}</div></div>`;
-    tile.addEventListener("click", () => {
-      if (tile.classList.contains("flipped")) return;
-      tile.classList.add("flipped");
-      found++;
-      foundCountEl.textContent = found;
-      progressFill.style.width = (found / wishes.length * 100) + "%";
-      confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
-      if (found === wishes.length) {
-        document.getElementById("elephantReveal").classList.add("show");
-        gameNextBtn.disabled = false;
-        setTimeout(burstConfetti, 300);
+  /* ══════════════ 3. mini game — "Polen's 26th Birthday Adventure" platformer ══════════════
+     A tiny, nearly-unfailable side-scroller: Childhood → University → Italy →
+     Birthday. No enemies, no lives, no timer — falling just respawns you at
+     the last safe spot with a playful toast. Reaching the cake ends it. */
+  (function initPlatformer() {
+    const stage = document.getElementById("pfStage");
+    const canvas = document.getElementById("pfCanvas");
+    const ctx = canvas.getContext("2d");
+    const cloverCountEl = document.getElementById("pfCloverCount");
+    const toastEl = document.getElementById("pfToast");
+    const endEl = document.getElementById("pfEnd");
+    const leftBtn = document.getElementById("pfLeftBtn");
+    const rightBtn = document.getElementById("pfRightBtn");
+    const jumpBtn = document.getElementById("pfJumpBtn");
+    const continueBtn = document.getElementById("pfContinueBtn");
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // simple sound hooks — silent no-ops until real files are wired in, e.g.
+    // SFX.sounds.jump = "sfx/jump.mp3";
+    const SFX = {
+      sounds: { jump: null, collect: null, respawn: null, win: null },
+      play(name) {
+        const src = this.sounds[name];
+        if (!src) return;
+        try { const a = new Audio(src); a.volume = 0.5; a.play().catch(() => {}); } catch (e) {}
       }
+    };
+
+    /* ── world layout (all in fixed 640×300 logical units) ── */
+    const VIEW_W = 640, VIEW_H = 300;
+    const GROUND_Y = 232;
+    const SECTION_W = 760;
+    const WORLD_W = SECTION_W * 4 + 260;
+    const CAKE_X = WORLD_W - 130;
+
+    const GAPS = [ { start: 700, end: 750 }, { start: 1460, end: 1512 }, { start: 2210, end: 2262 } ];
+    const PLATFORMS = [
+      { x: 1020, y: 168, w: 130, h: 16 },
+      { x: 1820, y: 168, w: 130, h: 16 }
+    ];
+    const SIGNS = [
+      { x: 70, text: "Little Polen started here." },
+      { x: 830, text: "Then came the university years." },
+      { x: 1590, text: "A new chapter in Italy." },
+      { x: 2350, text: "And now… Level 26." }
+    ];
+    const COLLECTIBLE_DEFS = [
+      { x: 260, y: GROUND_Y - 40 },
+      { x: 1010, y: GROUND_Y - 40 },
+      { x: 1085, y: 148 },
+      { x: 1790, y: GROUND_Y - 40 },
+      { x: 1885, y: 148 },
+      { x: 2680, y: GROUND_Y - 40 }
+    ];
+
+    function sectionAt(x) {
+      if (x < SECTION_W) return "childhood";
+      if (x < SECTION_W * 2) return "university";
+      if (x < SECTION_W * 3) return "italy";
+      return "birthday";
+    }
+    const THEMES = {
+      childhood: { sky: ["#fff3d6", "#ffd9ec"], ground: "#c9e8a8", groundEdge: "#a9d98a" },
+      university: { sky: ["#e7e6fb", "#dfe9ff"], ground: "#c7c2ee", groundEdge: "#a7a0dd" },
+      italy: { sky: ["#ffe3c2", "#ffd0c2"], ground: "#f0b98a", groundEdge: "#d99a63" },
+      birthday: { sky: ["#ffd9ec", "#e5d3ff"], ground: "#ffc2de", groundEdge: "#f29bc4" }
+    };
+
+    function isSolidGroundAt(x) {
+      if (x < 0 || x > WORLD_W) return false;
+      return !GAPS.some((g) => x > g.start && x < g.end);
+    }
+
+    /* ── player ── */
+    const P_W = 26, P_H = 32;
+    const GRAVITY = 0.62, JUMP_V = -12.6, MOVE_SPEED = 3.4, MAX_FALL = 14;
+    const player = {
+      x: 40, y: GROUND_Y - P_H, vx: 0, vy: 0, grounded: true, facing: 1, walkPhase: 0
+    };
+    let checkpoint = { x: player.x, y: player.y };
+    let camX = 0;
+
+    const collectibles = COLLECTIBLE_DEFS.map((c) => ({ ...c, collected: false, phase: Math.random() * Math.PI * 2 }));
+    let collectedCount = 0;
+    let gameEnded = false;
+
+    /* ── input ── */
+    const keys = { left: false, right: false };
+    let jumpQueued = false;
+
+    function isGameScreenActive() { return current === 2; }
+
+    window.addEventListener("keydown", (e) => {
+      if (!isGameScreenActive()) return;
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"].includes(e.code)) e.preventDefault();
+      if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = true;
+      if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = true;
+      if (e.code === "ArrowUp" || e.code === "KeyW" || e.code === "Space") jumpQueued = true;
     });
-    garden.appendChild(tile);
-  });
+    window.addEventListener("keyup", (e) => {
+      if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = false;
+      if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = false;
+    });
+
+    // mobile touch controls — large buttons, and page scroll is locked only
+    // while a control is actually being pressed
+    let lockCount = 0;
+    function lockScroll() { lockCount++; document.body.classList.add("game-scroll-lock"); }
+    function unlockScroll() { lockCount = Math.max(0, lockCount - 1); if (lockCount === 0) document.body.classList.remove("game-scroll-lock"); }
+    function bindHoldButton(btn, onDown, onUp) {
+      const down = (e) => { e.preventDefault(); lockScroll(); onDown(); };
+      const up = (e) => { e.preventDefault(); unlockScroll(); onUp(); };
+      btn.addEventListener("pointerdown", down);
+      btn.addEventListener("pointerup", up);
+      btn.addEventListener("pointercancel", up);
+      btn.addEventListener("pointerleave", up);
+    }
+    bindHoldButton(leftBtn, () => { keys.left = true; }, () => { keys.left = false; });
+    bindHoldButton(rightBtn, () => { keys.right = true; }, () => { keys.right = false; });
+    bindHoldButton(jumpBtn, () => { jumpQueued = true; }, () => {});
+
+    continueBtn.addEventListener("click", () => goTo(3));
+
+    /* ── responsive canvas: draw in a fixed 640×300 logical space,
+       scaled to whatever width the card gives us ── */
+    function resizeCanvas() {
+      const cssW = stage.clientWidth;
+      if (!cssW) return;
+      const cssH = cssW * (VIEW_H / VIEW_W);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.style.height = cssH + "px";
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      const scale = (cssW / VIEW_W) * dpr;
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    }
+    if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(stage);
+    else window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    /* ── toast (respawn message) ── */
+    let toastTimer = null;
+    function showToast() {
+      clearTimeout(toastTimer);
+      toastEl.classList.add("show");
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1700);
+    }
+
+    function respawn() {
+      player.x = checkpoint.x;
+      player.y = checkpoint.y;
+      player.vx = 0; player.vy = 0;
+      SFX.play("respawn");
+      showToast();
+    }
+
+    /* ── collision helpers ── */
+    function platformUnderPlayer(px, py) {
+      for (const p of PLATFORMS) {
+        if (px + P_W * 0.3 > p.x && px < p.x + p.w - P_W * 0.3 && py + P_H >= p.y && py + P_H <= p.y + 14) return p;
+      }
+      return null;
+    }
+
+    function update(dt) {
+      if (gameEnded) return;
+
+      player.vx = 0;
+      if (keys.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+      if (keys.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+
+      if (jumpQueued && player.grounded) {
+        player.vy = JUMP_V;
+        player.grounded = false;
+        SFX.play("jump");
+      }
+      jumpQueued = false;
+
+      player.vy = Math.min(player.vy + GRAVITY * dt, MAX_FALL);
+      player.x += player.vx * dt;
+      player.y += player.vy * dt;
+      player.x = Math.max(4, Math.min(player.x, WORLD_W - P_W - 4));
+
+      // ground / platform collision (only when moving downward)
+      player.grounded = false;
+      if (player.vy >= 0) {
+        const plat = platformUnderPlayer(player.x, player.y - player.vy * dt);
+        if (plat && player.y + P_H >= plat.y && player.y + P_H - player.vy * dt <= plat.y + 2) {
+          player.y = plat.y - P_H;
+          player.vy = 0;
+          player.grounded = true;
+        } else if (isSolidGroundAt(player.x + P_W / 2) && player.y + P_H >= GROUND_Y) {
+          player.y = GROUND_Y - P_H;
+          player.vy = 0;
+          player.grounded = true;
+        }
+      }
+
+      if (player.grounded) checkpoint = { x: player.x, y: player.y };
+
+      // fell into a gap → respawn, no game over
+      if (player.y > VIEW_H + 60) respawn();
+
+      if (Math.abs(player.vx) > 0.1) player.walkPhase += dt * 0.35;
+
+      // collectibles
+      for (const c of collectibles) {
+        if (c.collected) continue;
+        const dx = (player.x + P_W / 2) - c.x;
+        const dy = (player.y + P_H / 2) - c.y;
+        if (Math.abs(dx) < 22 && Math.abs(dy) < 24) {
+          c.collected = true;
+          collectedCount++;
+          cloverCountEl.textContent = collectedCount;
+          SFX.play("collect");
+          if (!reducedMotion) {
+            confetti({ particleCount: 22, spread: 50, startVelocity: 18, gravity: 1.1, origin: { x: 0.5, y: 0.4 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
+          }
+        }
+      }
+
+      // camera follows player, clamped to world bounds
+      const targetCam = Math.max(0, Math.min(player.x - VIEW_W / 2, WORLD_W - VIEW_W));
+      camX += (targetCam - camX) * Math.min(1, 0.15 * dt);
+
+      // reached the cake
+      if (!gameEnded && player.x + P_W >= CAKE_X - 6) endGame();
+    }
+
+    function endGame() {
+      gameEnded = true;
+      keys.left = false; keys.right = false;
+      SFX.play("win");
+      endEl.classList.add("show");
+      if (!reducedMotion) {
+        burstConfetti();
+        setTimeout(burstConfetti, 350);
+      }
+    }
+
+    /* ── drawing helpers (all original vector shapes — no external art) ── */
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawCloud(x, y, s) {
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 22 * s, 13 * s, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + 16 * s, y + 3 * s, 15 * s, 10 * s, 0, 0, Math.PI * 2);
+      ctx.ellipse(x - 16 * s, y + 4 * s, 14 * s, 9 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawHouse(x, y) {
+      ctx.fillStyle = "#ffd3e6";
+      roundRect(x, y - 34, 46, 34, 6); ctx.fill();
+      ctx.fillStyle = "#ff9ac4";
+      ctx.beginPath(); ctx.moveTo(x - 6, y - 34); ctx.lineTo(x + 23, y - 56); ctx.lineTo(x + 52, y - 34); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#fff6ea";
+      roundRect(x + 16, y - 20, 14, 20, 3); ctx.fill();
+      ctx.fillStyle = "#ffe08a";
+      ctx.beginPath(); ctx.arc(x + 8, y - 16, 4, 0, Math.PI * 2); ctx.arc(x + 34, y - 16, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawTeddyAndBlocks(x, y) {
+      ctx.fillStyle = "#c9946a";
+      ctx.beginPath(); ctx.arc(x, y - 10, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y - 22, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x - 6, y - 27, 3, 0, Math.PI * 2); ctx.arc(x + 6, y - 27, 3, 0, Math.PI * 2); ctx.fill();
+      ["#ff9ac4", "#8fe0c4", "#ffd76a"].forEach((c, i) => {
+        ctx.fillStyle = c;
+        roundRect(x + 16 + i * 13, y - 13, 11, 13, 2); ctx.fill();
+      });
+    }
+
+    function drawBook(x, y, color) {
+      ctx.fillStyle = color;
+      roundRect(x, y - 12, 26, 12, 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.5)";
+      ctx.fillRect(x + 3, y - 9, 20, 2);
+    }
+
+    function drawGradCap(x, y) {
+      ctx.fillStyle = "#4a3b45";
+      roundRect(x, y - 6, 22, 6, 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 11, y - 16); ctx.lineTo(x + 28, y - 6); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#ffd76a"; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(x + 11, y - 16); ctx.lineTo(x + 11, y - 2); ctx.stroke();
+      ctx.fillStyle = "#ffd76a"; ctx.beginPath(); ctx.arc(x + 11, y - 1, 2.4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawBuilding(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y - h, w, h);
+      ctx.fillStyle = "rgba(255,255,255,.35)";
+      for (let wy = y - h + 10; wy < y - 8; wy += 16) {
+        for (let wx = x + 6; wx < x + w - 10; wx += 14) ctx.fillRect(wx, wy, 7, 9);
+      }
+    }
+
+    function drawFlagAccent(x, y) {
+      const colors = ["#4c9a5b", "#f7f3ea", "#c1443a"];
+      colors.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(x + i * 6, y - 20, 6, 20); });
+    }
+
+    function drawEspresso(x, y) {
+      ctx.fillStyle = "#fff";
+      roundRect(x, y - 10, 16, 10, 3); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x + 18, y - 6, 4, -0.8, 2.4); ctx.stroke();
+      ctx.fillStyle = "#8a5a3a"; roundRect(x + 2, y - 8, 12, 5, 2); ctx.fill();
+    }
+
+    function drawBalloon(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.ellipse(x, y, 10, 13, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "rgba(74,59,69,.35)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, y + 13); ctx.quadraticCurveTo(x + 6, y + 26, x, y + 38); ctx.stroke();
+    }
+
+    function drawGift(x, y, color) {
+      ctx.fillStyle = color;
+      roundRect(x, y - 20, 22, 20, 3); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(x + 9, y - 20, 4, 20);
+      ctx.fillRect(x, y - 12, 22, 4);
+    }
+
+    function drawCloverIcon(x, y, t) {
+      const bob = reducedMotion ? 0 : Math.sin(t) * 3;
+      ctx.save();
+      ctx.translate(x, y + bob);
+      ctx.fillStyle = "#7fd67a";
+      [[0, -6], [6, 0], [0, 6], [-6, 0]].forEach(([dx, dy]) => {
+        ctx.beginPath(); ctx.ellipse(dx, dy, 6, 5, Math.atan2(dy, dx), 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.fillStyle = "#5fb85a";
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSign(x, groundY, text) {
+      ctx.fillStyle = "#c9a27a";
+      ctx.fillRect(x - 2, groundY - 46, 4, 46);
+      ctx.fillStyle = "#fff9ee";
+      roundRect(x - 58, groundY - 76, 116, 34, 8); ctx.fill();
+      ctx.strokeStyle = "#e9c9a0"; ctx.lineWidth = 2; roundRect(x - 58, groundY - 76, 116, 34, 8); ctx.stroke();
+      ctx.fillStyle = "#4a3b45";
+      ctx.font = "700 10.5px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      wrapText(text, x, groundY - 62, 100, 12);
+    }
+
+    function wrapText(text, cx, y, maxW, lineH) {
+      const words = text.split(" ");
+      let line = "", lines = [];
+      words.forEach((w) => {
+        const test = line ? line + " " + w : w;
+        if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+        else line = test;
+      });
+      lines.push(line);
+      lines.forEach((l, i) => ctx.fillText(l, cx, y + i * lineH));
+    }
+
+    function drawCake(x, groundY) {
+      const baseY = groundY;
+      ctx.fillStyle = "#ffb8dd";
+      roundRect(x - 46, baseY - 34, 92, 34, 8); ctx.fill();
+      ctx.fillStyle = "#ff85c2";
+      roundRect(x - 34, baseY - 58, 68, 26, 8); ctx.fill();
+      ctx.fillStyle = "#ffd76a";
+      roundRect(x - 22, baseY - 78, 44, 22, 7); ctx.fill();
+      // "26" candles
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2.4;
+      [x - 8, x + 8].forEach((cx) => { ctx.beginPath(); ctx.moveTo(cx, baseY - 78); ctx.lineTo(cx, baseY - 92); ctx.stroke(); });
+      ctx.fillStyle = "#ff8266";
+      [x - 8, x + 8].forEach((cx) => { ctx.beginPath(); ctx.ellipse(cx, baseY - 95, 2.4, 4, 0, 0, Math.PI * 2); ctx.fill(); });
+      ctx.fillStyle = "#4a3b45";
+      ctx.font = "900 13px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("26", x, baseY - 40);
+      // sprinkles
+      const sprinkleColors = ["#ff8266", "#8fe0c4", "#b8a4e3", "#ffd76a"];
+      for (let i = 0; i < 10; i++) {
+        ctx.fillStyle = sprinkleColors[i % sprinkleColors.length];
+        ctx.fillRect(x - 40 + (i * 8) % 88, baseY - 30 + ((i * 13) % 20), 3, 3);
+      }
+    }
+
+    function drawPlayer() {
+      const bob = player.grounded ? Math.sin(player.walkPhase * 6) * (Math.abs(player.vx) > 0.1 ? 1.4 : 0) : 0;
+      const squash = player.grounded ? 1 : Math.max(0.85, 1 - Math.abs(player.vy) * 0.01);
+      const cx = player.x - camX + P_W / 2;
+      const cy = player.y + P_H - bob;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(74,59,69,.18)";
+      ctx.beginPath(); ctx.ellipse(cx, player.y + P_H + 4, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.translate(cx, cy - P_H / 2);
+      ctx.scale(player.facing * (0.9 + 0.1 * squash), squash);
+
+      // body
+      ctx.fillStyle = "#ff8266";
+      roundRect(-P_W / 2, -P_H / 2, P_W, P_H, 12); ctx.fill();
+      // little feet
+      if (player.grounded) {
+        ctx.fillStyle = "#e8664a";
+        const legOffset = Math.abs(player.vx) > 0.1 ? Math.sin(player.walkPhase * 6) * 4 : 0;
+        roundRect(-9 + legOffset, P_H / 2 - 6, 8, 8, 3); ctx.fill();
+        roundRect(1 - legOffset, P_H / 2 - 6, 8, 8, 3); ctx.fill();
+      }
+      // face
+      ctx.fillStyle = "#3a2f38";
+      ctx.beginPath(); ctx.arc(-5, -3, 2, 0, Math.PI * 2); ctx.arc(6, -3, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#3a2f38"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.arc(0, 1, 5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+      // little bow, an original touch — not any existing character
+      ctx.fillStyle = "#b8a4e3";
+      ctx.beginPath(); ctx.moveTo(-3, -P_H / 2 - 1); ctx.lineTo(-10, -P_H / 2 - 7); ctx.lineTo(-10, -P_H / 2 + 5); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(3, -P_H / 2 - 1); ctx.lineTo(10, -P_H / 2 - 7); ctx.lineTo(10, -P_H / 2 + 5); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#8f6fce";
+      ctx.beginPath(); ctx.arc(0, -P_H / 2 - 1, 3, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    }
+
+    function draw() {
+      const theme = THEMES[sectionAt(player.x)];
+      const grad = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+      grad.addColorStop(0, theme.sky[0]);
+      grad.addColorStop(1, theme.sky[1]);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      // soft drifting clouds (paused if reduced motion)
+      const cloudDrift = reducedMotion ? 0 : performance.now() * 0.008;
+      for (let i = 0; i < 5; i++) {
+        const wx = i * 260 + 80 - cloudDrift * (0.2 + i * 0.05) - camX * 0.3;
+        drawCloud(((wx % (VIEW_W + 200)) + VIEW_W + 200) % (VIEW_W + 200) - 100, 40 + (i % 3) * 18, 0.8 + (i % 2) * 0.3);
+      }
+
+      ctx.save();
+      ctx.translate(-camX, 0);
+
+      // decorative per-section props (only draw what's roughly in view)
+      const viewStart = camX - 60, viewEnd = camX + VIEW_W + 60;
+      function inView(x) { return x > viewStart && x < viewEnd; }
+
+      if (inView(180)) drawHouse(150, GROUND_Y);
+      if (inView(430)) drawTeddyAndBlocks(430, GROUND_Y);
+      if (inView(600)) drawTeddyAndBlocks(600, GROUND_Y);
+
+      if (inView(880)) { drawBook(870, GROUND_Y, "#ff9ac4"); drawBook(895, GROUND_Y, "#8fe0c4"); }
+      if (inView(1180)) drawGradCap(1170, GROUND_Y);
+      if (inView(1350)) { drawBook(1340, GROUND_Y, "#ffd76a"); drawBook(1365, GROUND_Y, "#b8a4e3"); }
+
+      if (inView(1650)) drawFlagAccent(1640, GROUND_Y);
+      if (inView(1720)) drawEspresso(1700, GROUND_Y);
+      if (inView(1980)) drawBuilding(1960, GROUND_Y, 44, 70, "#e8b18a");
+      if (inView(2080)) drawBuilding(2060, GROUND_Y, 34, 54, "#f0c9a0");
+
+      if (inView(2420)) { drawBalloon(2400, GROUND_Y - 60, "#ff85c2"); drawBalloon(2430, GROUND_Y - 70, "#8fe0c4"); }
+      if (inView(2560)) drawGift(2540, GROUND_Y, "#b8a4e3");
+      if (inView(2560)) drawGift(2580, GROUND_Y, "#ffd76a");
+      if (inView(2850)) { drawBalloon(2830, GROUND_Y - 65, "#ffd76a"); drawBalloon(2870, GROUND_Y - 55, "#ff8266"); }
+
+      // ground
+      for (let gx = 0; gx < WORLD_W; gx += 20) {
+        if (!inView(gx)) continue;
+        if (!isSolidGroundAt(gx + 10)) continue;
+        const t = THEMES[sectionAt(gx)];
+        ctx.fillStyle = t.groundEdge;
+        ctx.fillRect(gx, GROUND_Y, 20, 6);
+        ctx.fillStyle = t.ground;
+        ctx.fillRect(gx, GROUND_Y + 6, 20, VIEW_H - GROUND_Y - 6);
+      }
+
+      // platforms
+      PLATFORMS.forEach((p) => {
+        if (!inView(p.x)) return;
+        ctx.fillStyle = "#fff6ea";
+        roundRect(p.x, p.y, p.w, p.h, 6); ctx.fill();
+        ctx.fillStyle = "rgba(74,59,69,.08)";
+        roundRect(p.x, p.y + p.h - 3, p.w, 3, 3); ctx.fill();
+      });
+
+      // signs
+      SIGNS.forEach((s) => { if (inView(s.x)) drawSign(s.x, GROUND_Y, s.text); });
+
+      // collectibles
+      const t = performance.now() * 0.003;
+      collectibles.forEach((c) => { if (!c.collected && inView(c.x)) drawCloverIcon(c.x, c.y, t + c.phase); });
+
+      // cake + party ground accent
+      if (inView(CAKE_X)) drawCake(CAKE_X, GROUND_Y);
+
+      drawPlayer();
+
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function loop(now) {
+      requestAnimationFrame(loop);
+      if (!isGameScreenActive()) { last = now; return; }
+      let dt = (now - last) / 16.6667;
+      dt = Math.min(dt, 2);
+      last = now;
+      update(dt);
+      draw();
+    }
+    requestAnimationFrame(loop);
+  })();
 
   /* ══════════════ 4. quiz ══════════════ */
   const quiz = [
     { q: "Polen bu yıl kaç yaşına giriyor?", opts: ["24", "25", "26", "27"], a: 2 },
     { q: "Fillerin hafızasıyla ilgili hangisi doğru?", opts: ["Çok kısa sürede unuturlar", "Yıllarca hatırlayabilirler", "Hiç hatırlamazlar", "Sadece kokuları hatırlarlar"], a: 1 },
-    { q: "Bu sitedeki bahçede kaç tane şanslı yonca vardı?", opts: ["5", "6", "8", "10"], a: 2 },
+    { q: "Mini oyunda Polen'in yolculuğu kaç bölümden geçiyor?", opts: ["2", "3", "4", "5"], a: 2 },
     { q: "Dört yapraklı yonca bulmak genelde nasıldır?", opts: ["Çok sık rastlanır", "Oldukça nadirdir", "Hiç bulunmaz", "Sadece kışın çıkar"], a: 1 }
   ];
   const quizWrap = document.getElementById("quizWrap");
