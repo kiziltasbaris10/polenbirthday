@@ -559,6 +559,46 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     }, 320);
   }
 
+  // "Evet" dendiğinde patlayan büyük şölen: yukarıdan aşağı, aşağıdan yukarı
+  // konfetiler, ayıcık/eşek/fil/yonca/yaprak şekilleri ve kocaman havai fişekler.
+  function superCelebration() {
+    const shapes = [
+      confetti.shapeFromText({ text: "🧸", scalar: 2.4 }),
+      confetti.shapeFromText({ text: "🫏", scalar: 2.4 }),
+      confetti.shapeFromText({ text: "🐘", scalar: 2.4 }),
+      confetti.shapeFromText({ text: "🍀", scalar: 2 }),
+      confetti.shapeFromText({ text: "🍃", scalar: 2 })
+    ];
+    const palette = ["#ff85c2", "#ffca3a", "#7fd67a", "#9b5de5", "#ffffff"];
+
+    // yukarıdan aşağı sağanak
+    confetti({ particleCount: 130, spread: 170, origin: { x: 0.5, y: -0.05 }, startVelocity: 30, gravity: 0.9, colors: palette });
+    confetti({ particleCount: 70, spread: 150, origin: { x: 0.5, y: -0.05 }, startVelocity: 35, gravity: 0.8, shapes, scalar: 2.2 });
+
+    // aşağıdan yukarı fışkırma
+    confetti({ particleCount: 90, angle: 90, spread: 110, origin: { x: 0.5, y: 1.05 }, startVelocity: 60, gravity: 0.7, shapes, scalar: 2.2 });
+    confetti({ particleCount: 70, angle: 60, spread: 70, origin: { x: 0, y: 1.05 }, startVelocity: 65, colors: palette });
+    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 1.05 }, startVelocity: 65, colors: palette });
+
+    // kocaman, art arda gelen havai fişekler
+    let count = 0;
+    const fireworks = setInterval(() => {
+      confetti({
+        particleCount: 130, startVelocity: 48, spread: 360, scalar: 1.5,
+        origin: { x: Math.random(), y: 0.15 + Math.random() * 0.5 },
+        colors: palette
+      });
+      if (Math.random() > 0.45) {
+        confetti({
+          particleCount: 22, spread: 360, scalar: 2.6, shapes,
+          origin: { x: Math.random(), y: 0.2 + Math.random() * 0.4 }
+        });
+      }
+      count++;
+      if (count >= 10) clearInterval(fireworks);
+    }, 260);
+  }
+
   const introMsg = document.getElementById("introMsg");
   const imAskWrap = document.getElementById("imAskWrap");
   const imAskBtns = document.getElementById("imAskBtns");
@@ -622,7 +662,10 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     introMsg.classList.add("hide");
     setTimeout(() => { introMsg.style.display = "none"; }, 850);
   }
-  imYesBtn.addEventListener("click", hideIntroMsg);
+  imYesBtn.addEventListener("click", () => {
+    hideIntroMsg();
+    superCelebration();
+  });
   imSkipBtn.addEventListener("click", hideIntroMsg);
 
   // "Hayır" imkansız: üstüne gelindiğinde kutunun içinde rastgele bir yere kaçar
