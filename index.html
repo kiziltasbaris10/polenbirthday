@@ -368,7 +368,13 @@
   .jp-label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.25; }
 
   /* ── memory game ── */
-  .mem-pairs { text-align: center; font-weight: 800; color: var(--pink-deep); font-size: 14px; margin-bottom: 16px; }
+  .mem-pairs { text-align: center; font-weight: 800; color: var(--pink-deep); font-size: 14px; margin-bottom: 16px; transition: font-size .3s ease; }
+  .mem-pairs.done { font-size: 17px; color: var(--green-deep); animation: memDonePop .6s cubic-bezier(.34,1.6,.64,1); }
+  @keyframes memDonePop {
+    0% { transform: scale(.6); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
   .mem-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
     max-width: 380px; margin: 0 auto;
@@ -1311,9 +1317,8 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
 
 
   /* ══════════════ 2. memory game ══════════════
-     Italy (Polen's Italy chapter), köfte, Barcelona FC (no exact crest
-     emoji exists, ⚽ stands in), elephant, teddy bear, strawberry. */
-  const memEmojis = ["🇮🇹", "🧆", "⚽", "🐘", "🧸", "🍓"];
+     elephant, strawberry, clover, avocado, potato, teddy bear. */
+  const memEmojis = ["🐘", "🍓", "🍀", "🥑", "🥔", "🧸"];
   let memFlipped = [], memMatched = 0, memCanFlip = true;
   const memPairsEl = document.getElementById("memPairs");
   const memGrid = document.getElementById("memGrid");
@@ -1321,6 +1326,7 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   function initMemoryGame() {
     memFlipped = []; memMatched = 0; memCanFlip = true;
     memPairsEl.textContent = memEmojis.length + " çift kaldı";
+    memPairsEl.classList.remove("done");
     memGrid.innerHTML = "";
     const pairs = memEmojis.concat(memEmojis);
     for (let i = pairs.length - 1; i > 0; i--) {
@@ -1352,8 +1358,14 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
       memMatched++;
       safeConfetti({ particleCount: 35, spread: 55, origin: { y: 0.6 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
       const left = memEmojis.length - memMatched;
-      memPairsEl.textContent = left === 0 ? "Hepsini buldun! 🎉" : left + " çift kaldı";
-      if (memMatched === memEmojis.length) setTimeout(burstConfetti, 300);
+      if (left === 0) {
+        memPairsEl.textContent = "Hepsini buldun! Harikasın! 🎉";
+        memPairsEl.classList.add("done");
+        burstConfetti();
+        setTimeout(burstConfetti, 500);
+      } else {
+        memPairsEl.textContent = left + " çift kaldı";
+      }
     } else {
       a.classList.remove("flipped"); b.classList.remove("flipped");
     }
