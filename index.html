@@ -356,7 +356,7 @@
 
   .pf-toast {
     position: absolute; left: 50%; top: 14px; transform: translate(-50%, -14px);
-    background: #fff; color: var(--ink); font-weight: 800; font-size: 13px;
+    background: #fff; color: var(--ink); font-weight: 800; font-size: 13px; line-height: normal;
     padding: 9px 16px; border-radius: 999px; box-shadow: 0 8px 20px rgba(0,0,0,.15);
     opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
     white-space: nowrap; max-width: 90%; text-overflow: ellipsis; overflow: hidden;
@@ -364,6 +364,9 @@
   .pf-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
   .pf-end {
+    /* .pf-stage sets line-height:0 (to hug the canvas with no gap below it);
+       reset it here so the popup's text doesn't collapse into itself */
+    line-height: normal;
     position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
     background: rgba(74, 59, 69, .55); backdrop-filter: blur(2px); opacity: 0; transition: opacity .4s ease;
   }
@@ -1008,6 +1011,14 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       { x: 1590, text: "A new chapter in Italy." },
       { x: 2350, text: "And now… Level 26." }
     ];
+    // little extra story beats, drawn inside soft clouds in the sky so they
+    // don't compete visually with the ground-level signs
+    const CLOUD_MESSAGES = [
+      { x: 650, y: 118, text: "She also travelled all across Europe. ✈️" },
+      { x: 1250, y: 118, text: "Countless memories & great friends in Çanakkale — graduated with success. 🎓" },
+      { x: 2140, y: 118, text: "Aiming higher, feet on the ground — Italy for her master's, and she thrived. 🇮🇹" },
+      { x: 2750, y: 118, text: "Now 26 — can't wait to see what's next. She'll only keep getting better. ✨" }
+    ];
     const COLLECTIBLE_DEFS = [
       { x: 190, y: GROUND_Y - 40 },
       { x: 1010, y: GROUND_Y - 40 },
@@ -1359,6 +1370,23 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       wrapText(text, x, groundY - 75, 112, 12);
     }
 
+    function drawCloudMessage(x, y, text) {
+      ctx.save();
+      ctx.globalAlpha = 0.94;
+      ctx.fillStyle = "#ffffff";
+      const puffs = [
+        [0, -6, 36], [-36, 6, 26], [36, 6, 26], [-18, -20, 22], [18, -20, 22],
+        [0, 22, 32], [-54, 18, 18], [54, 18, 18]
+      ];
+      puffs.forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(x + dx, y + dy, r, 0, Math.PI * 2); ctx.fill(); });
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#6b5460";
+      ctx.font = "700 9.5px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      wrapText(text, x, y - 20, 112, 11.5);
+      ctx.restore();
+    }
+
     function wrapText(text, cx, y, maxW, lineH) {
       const words = text.split(" ");
       let line = "", lines = [];
@@ -1533,6 +1561,7 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
 
       // signs
       SIGNS.forEach((s) => { if (inView(s.x)) drawSign(s.x, GROUND_Y, s.text); });
+      CLOUD_MESSAGES.forEach((m) => { if (inView(m.x)) drawCloudMessage(m.x, m.y, m.text); });
 
       // collectibles
       const t = performance.now() * 0.003;
