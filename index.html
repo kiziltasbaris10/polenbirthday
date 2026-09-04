@@ -467,6 +467,10 @@
   .people-modal-photos.single { grid-template-columns: 1fr; }
   .people-modal-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
   .people-modal-photos.single img { aspect-ratio: 4/3; }
+  .people-modal-video {
+    grid-column: 1 / -1; width: 100%; max-height: 60vh; border-radius: 12px;
+    background: #000; margin-bottom: 4px;
+  }
 
   /* ── letter ── */
   .envelope { width: 200px; height: 138px; margin: 16px auto 0; position: relative; cursor: pointer; }
@@ -1741,15 +1745,21 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   });
 
   /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
-     Fill in message/photos as each friend's note comes in. photos is an
-     array of paths relative to index.html (e.g. ["friends/pamir1.jpg",
-     "friends/pamir2.jpg"]) — as many as they sent, or [] if none yet. */
+     Fill in message/photos/video as each friend's note comes in. photos is
+     an array of paths relative to index.html (e.g. ["friends/pamir1.jpg",
+     "friends/pamir2.jpg"]) — as many as they sent, or [] if none yet.
+     video is a single optional path, or "" if there isn't one. */
   const friendMessages = [
-    { name: "Pamir", message: "", photos: [] },
-    { name: "Yağmur", message: "", photos: [] },
-    { name: "Ceren", message: "", photos: [] },
-    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photos: ["friends/jovana.jpg"] },
-    { name: "Sofia", message: "", photos: [] }
+    { name: "Pamir", message: "", photos: [], video: "" },
+    { name: "Yağmur", message: "", photos: [], video: "" },
+    {
+      name: "Ceren",
+      message: "Birtaneciğimmm canım Polennnn 💕 üç yıl önce Caterina'nın gelip de \"arkada bir Türk kız daha var belki arkadaş olursunuz\" dediği an dün gibi aklımda. Dönüp baktığımda \"Ne kadar güzel bir enerjisi var\" demiş ve anında anlamıştım çok iyi anlaşacağımızı. Ama doğrusu bunca yaşadığımız anıyı inan hayal bile edemezdim 🥹 bir evde beraber geçirdiğimiz o harika yıllar, \"Gigi Hadid pasta yapıcam yer misin?\" yemekleri, \"Bir böcek gördüm sabah onu alır mısın 🥲\" yalvarışlarım, kilometrelerce yürüdüğümüz yollar, psikolojimizi bozan sınavlar, beraber çıktığımız tatiller, gidip gezdiğimiz onca güzel yerler, daha da güzeli bunları seninle yaşamak.. Her zaman aynı şeyi söylüyorum ama benim için sadece bir arkadaş bir dost değil, bir aile, bir evsin. Ve bir ömür hayatımın baş köşesinde senin kadar güzel enerjisi olan, harika bir insan olduğu için çok minnettarım 💕 iyi ki doğdun bebeğimmm doğum günün çok ama çok kutlu olsun. Nice nice çok mutlu yaşlara. Hayal ettiğin her şey en güzel haliyle hep karşına çıksın, seni çok çok seviyorummm 💕💕",
+      photos: ["friends/ceren1.jpg", "friends/ceren2.jpg", "friends/ceren3.jpg", "friends/ceren4.jpg", "friends/ceren5.jpg"],
+      video: "friends/ceren-video.mp4"
+    },
+    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photos: ["friends/jovana.jpg"], video: "" },
+    { name: "Sofia", message: "", photos: [], video: "" }
   ];
 
   const wordsGrid = document.getElementById("wordsGrid");
@@ -1766,6 +1776,14 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     peopleModalMessage.classList.toggle("placeholder", !hasMessage);
     peopleModalPhotos.innerHTML = "";
     peopleModalPhotos.className = "people-modal-photos" + (fm.photos.length <= 1 ? " single" : "");
+    if (fm.video) {
+      const video = document.createElement("video");
+      video.className = "people-modal-video";
+      video.src = fm.video;
+      video.controls = true;
+      video.playsInline = true;
+      peopleModalPhotos.appendChild(video);
+    }
     fm.photos.forEach((src) => {
       const img = document.createElement("img");
       img.src = src;
@@ -1774,7 +1792,11 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     });
     peopleOverlay.classList.add("show");
   }
-  function closePeopleModal() { peopleOverlay.classList.remove("show"); }
+  function closePeopleModal() {
+    peopleOverlay.classList.remove("show");
+    const video = peopleModalPhotos.querySelector("video");
+    if (video) video.pause();
+  }
   peopleModalClose.addEventListener("click", closePeopleModal);
   peopleOverlay.addEventListener("click", (e) => { if (e.target === peopleOverlay) closePeopleModal(); });
 
