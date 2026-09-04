@@ -431,9 +431,23 @@
   .envelope.open .env-flap { transform: rotateX(180deg); }
   .env-icon { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 26px; }
   .env-hint { margin-top: 12px; font-size: 13px; color: var(--muted); text-align: center; }
-  .letter-body { display: none; text-align: left; margin-top: 20px; white-space: pre-line; line-height: 1.85; font-size: 15px; }
+  .letter-body {
+    display: none; text-align: left; margin-top: 20px; white-space: pre-line;
+    line-height: 1.85; font-size: 15px; font-family: 'Fraunces', 'Segoe UI', serif;
+    position: relative; background: linear-gradient(180deg, #fffaf0, #fff6ea);
+    border-radius: 16px; padding: 28px 24px 24px;
+    box-shadow: inset 0 0 0 1px #f3e0c8, 0 10px 24px rgba(0,0,0,.07);
+  }
+  .letter-body::before {
+    content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 4px;
+    background: linear-gradient(90deg, var(--pink), var(--yellow), var(--green));
+    border-radius: 0 0 4px 4px;
+  }
   .letter-body.show { display: block; animation: pop .5s ease; }
-  .letter-sig { margin-top: 14px; font-weight: 800; color: var(--pink-deep); text-align: right; display: none; }
+  .letter-close {
+    margin-top: 16px; text-align: right; font-style: italic; font-weight: 700;
+    color: var(--pink-deep); line-height: 1.5;
+  }
 
   /* ── make a wish ── */
   .cake-wrap { text-align: center; }
@@ -661,14 +675,25 @@
       </div>
       <div class="env-hint" id="envHint">👆 Zarfa tıkla</div>
 
-      <div class="letter-body" id="letterBody">Sevgili Polen,
+      <div class="letter-body" id="letterBody">Sevgilim,
 
-Bugün senin günün ve sana pembe, sarı, yeşil rengin en açık ve en güzel tonlarından bir doğum günü hazırlamak istedim. Çünkü sen hayatıma her zaman böyle aydınlık bir enerjiyle dokunuyorsun.
+Bugün 26 yaşına giriyorsun. Bu yaşına kadar yaşadığın bütün güzellikler, zor zamanlar, stresli anlar ve atlattığın her şey bugünkü seni oluşturdu. Ve ben bugünkü seni çok seviyorum.
 
-Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin, önümüzdeki her gün seni gülümseten küçük sürprizlerle dolsun. Ve bir gün, belki de en sevdiğin o fili gerçekten karşında görürsün — o günü de birlikte kutlarız.
+26 yaşına kadar başardıklarına baktığımda seninle gerçekten gurur duyuyorum. Mükemmel bir aile üyesi, çok iyi bir arkadaş, çok güzel bir sevgili oldun. Bunun yanında çok başarılı bir akademik kariyer inşa ettin ve eminim bunlar daha başlangıç. Sende bundan çok daha fazlası var. Potansiyeline, enerjine ve hayata kattığın güzelliğe çok güveniyorum. Çünkü sen gerçekten çevrene güneş gibi enerji saçan birisin.
 
-Şimdilik bilmeni istediğim tek şey var: iyi ki doğdun, iyi ki varsın. Seni çok seviyorum.</div>
-      <div class="letter-sig" id="letterSig">— Barış</div>
+Hayata karşı heyecanını biraz kaybetmiş, enerjisi olmayan, keyifsiz Barış'ı adeta yeniden maça soktun. Her gün daha iyiye gitmem için en büyük motivasyonlarımdan biri oldun.
+
+Bu web sitesini hazırlarken arkadaşlarından seninle ilgili aldığım güzel sözler beni hem çok şanslı hissettirdi hem de senin aslında hayatta ne kadar çok şey başardığını bir kez daha görmemi sağladı.
+
+İtalya'da gezerken bana söylediğin bir söz hâlâ aklımda: "Keşke daha erken tanışsaydık."
+
+Ben de sana bir söz veriyorum. Bundan sonraki bütün doğum günlerini beraber kutlayacağız.
+
+Sana öyle sahip çıkacağım ki, uykunda boşluğa düşüyormuş gibi hissettiğin anlarda bile seni benim tutacağımı bileceksin.
+
+İyi ki doğdun sevgilim.
+İyi ki varsın.
+Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 🍁</div></div>
 
       <div class="nav-row">
         <button class="btn btn-ghost" onclick="goTo(4)">← Geri</button>
@@ -1686,7 +1711,6 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   envelope.addEventListener("click", () => {
     envelope.classList.add("open");
     document.getElementById("letterBody").classList.add("show");
-    document.getElementById("letterSig").style.display = "block";
     document.getElementById("envHint").style.display = "none";
   });
 
