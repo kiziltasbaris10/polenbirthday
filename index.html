@@ -173,6 +173,30 @@
   }
   #introMsg .im-skip:hover { opacity: 1; color: var(--i-coral-deep); }
 
+  /* ── 3-2-1 countdown overlay (before revealing the site) ── */
+  #countdownOverlay {
+    display: none; position: fixed; inset: 0; z-index: 10001;
+    background: radial-gradient(circle at center, #3a2a52 0%, #17111f 80%);
+    align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  }
+  #countdownOverlay.show { display: flex; }
+  #cdNum {
+    font-family: 'Fraunces', serif; font-weight: 900;
+    font-size: clamp(120px, 32vw, 220px); line-height: 1; text-align: center;
+    text-shadow: 0 0 60px currentColor;
+  }
+  #cdLabel {
+    display: none; font-family: 'Fraunces', serif; font-style: italic;
+    font-size: clamp(28px, 7vw, 52px); font-weight: 800; color: var(--i-yellow);
+    text-shadow: 0 0 40px rgba(255, 215, 106, .8); text-align: center; letter-spacing: 1px;
+  }
+  @keyframes cdPop { 0% { transform: scale(.3); opacity: 0; } 55% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes cdOut { to { transform: scale(2.1); opacity: 0; } }
+  @keyframes cdSlam { 0% { transform: scale(.2) translateY(-40px); opacity: 0; } 70% { transform: scale(1.08) translateY(0); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+  .cd-pop { animation: cdPop .45s cubic-bezier(.36,1.5,.64,1) both; }
+  .cd-out { animation: cdOut .25s ease-in both; }
+  .cd-slam { animation: cdSlam .55s cubic-bezier(.36,1.4,.64,1) both; }
+
   /* ── studio presents splash ── */
   #splash {
     position: fixed; inset: 0; z-index: 10001;
@@ -434,6 +458,11 @@
   <div class="event-grain"></div>
 </div>
 
+<div id="countdownOverlay">
+  <div id="cdNum"></div>
+  <div id="cdLabel">BAŞLIYORUZ! 🎉</div>
+</div>
+
 <div class="floaters" id="floaters"></div>
 <canvas id="confettiCanvas"></canvas>
 <div class="progress-dots" id="progressDots"></div>
@@ -452,7 +481,7 @@
       </div>
 
       <h1>İyi ki doğdun<br>Polen!</h1>
-      <p class="sub">Sana pastel renklerle, biraz şansla ve birkaç sürprizle dolu küçük bir doğum günü deneyimi hazırladım. Hazır olduğunda başlayalım 🌸</p>
+      <p class="sub">Bugün sadece doğum gününü kutlamak istemedim. Sana baktığımda gördüğüm tüm güzellikleri, seni sen yapan küçük şeyleri ve seni ne kadar özel bulduğumu bir araya getirmek istedim. Bu küçük sayfa da tam olarak bunun için… İyi ki doğdun sevgilim. ❤️</p>
 
       <div class="age-badge">
         <span class="age-num">26</span>
@@ -736,9 +765,60 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     introMsg.classList.add("hide");
     setTimeout(() => { introMsg.style.display = "none"; }, 850);
   }
+  // "Evet" → mesaj kartı hemen kaybolmaya başlar (arkada, örtünün altında),
+  // 3-2-1 geri sayımı oynar, sonra "BAŞLIYORUZ!" ile büyük kutlama patlar.
+  function startCountdown321(cb) {
+    const overlay = document.getElementById("countdownOverlay");
+    const numEl = document.getElementById("cdNum");
+    const lblEl = document.getElementById("cdLabel");
+    overlay.classList.add("show");
+    numEl.style.display = "block";
+    lblEl.style.display = "none";
+
+    const steps = [
+      { n: "3", color: "#ff8266" },
+      { n: "2", color: "#b8a4e3" },
+      { n: "1", color: "#8fe0c4" }
+    ];
+    let i = 0;
+
+    function showNum() {
+      if (i >= steps.length) {
+        numEl.style.display = "none";
+        lblEl.style.display = "block";
+        lblEl.className = "cd-slam";
+        confetti({ particleCount: 180, spread: 130, startVelocity: 55, ticks: 200, origin: { x: 0.5, y: 0.5 }, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+        setTimeout(() => {
+          overlay.style.transition = "opacity .35s";
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.classList.remove("show");
+            overlay.style.opacity = "";
+            overlay.style.transition = "";
+            lblEl.style.display = "none";
+            numEl.style.display = "block";
+            cb();
+          }, 360);
+        }, 1100);
+        return;
+      }
+      const s = steps[i];
+      numEl.textContent = s.n;
+      numEl.style.color = s.color;
+      numEl.className = "cd-pop";
+      setTimeout(() => {
+        numEl.className = "cd-out";
+        setTimeout(() => { i++; showNum(); }, 250);
+      }, 650);
+    }
+    showNum();
+  }
+
   imYesBtn.addEventListener("click", () => {
     hideIntroMsg();
-    superCelebration();
+    startCountdown321(() => {
+      superCelebration();
+    });
   });
   imSkipBtn.addEventListener("click", hideIntroMsg);
 
