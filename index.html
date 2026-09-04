@@ -1233,8 +1233,12 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     startCountdown321(() => {
       superCelebration();
     });
+    bgMusic.play().catch(() => {});
   });
-  imSkipBtn.addEventListener("click", hideIntroMsg);
+  imSkipBtn.addEventListener("click", () => {
+    hideIntroMsg();
+    bgMusic.play().catch(() => {});
+  });
 
   // "Hayır" imkansız: üstüne gelindiğinde kutunun içinde rastgele bir yere kaçar
   // ve her kaçışta değişen şakacı bir yazıyla dalga geçer.
