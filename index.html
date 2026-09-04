@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Polen'in Doğum Günü 🍀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,900;1,600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   :root {
@@ -16,6 +19,16 @@
     --ink: #4a3b45;
     --muted: #8a7288;
     --card: #ffffffef;
+
+    /* intro-only "event" palette — used by #splash and #introMsg only */
+    --i-cream: #faf3e6;
+    --i-coral: #ff8266;
+    --i-coral-deep: #f2603f;
+    --i-lavender: #b8a4e3;
+    --i-lavender-deep: #8f6fce;
+    --i-mint: #8fe0c4;
+    --i-yellow: #ffd76a;
+    --i-ink: #3a2f45;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,60 +43,96 @@
 
   #confettiCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10002; }
 
+  /* ── shared "event" gradient + grain for the intro (splash + message) ── */
+  @keyframes eventGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .event-bg {
+    background: linear-gradient(120deg,
+      var(--i-cream) 0%, var(--i-coral) 22%, var(--i-lavender) 50%,
+      var(--i-mint) 74%, var(--i-yellow) 100%);
+    background-size: 320% 320%;
+    animation: eventGradientShift 16s ease-in-out infinite;
+  }
+  .event-grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .event-parallax { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .event-blob {
+    position: absolute; width: 58vw; height: 58vw; max-width: 480px; max-height: 480px;
+    left: 50%; top: 50%; margin-left: -240px; margin-top: -240px;
+    border-radius: 50%; filter: blur(46px); opacity: .5;
+    background:
+      radial-gradient(circle at 28% 28%, var(--i-coral) 0%, transparent 60%),
+      radial-gradient(circle at 72% 68%, var(--i-lavender) 0%, transparent 60%),
+      radial-gradient(circle at 45% 90%, var(--i-mint) 0%, transparent 55%);
+    transition: transform .25s ease-out;
+  }
+  .event-photo {
+    position: absolute; left: 50%; top: 52%; width: min(300px, 56vw); aspect-ratio: 4/5;
+    margin-left: -150px; margin-top: -190px;
+    border-radius: 22px; object-fit: cover;
+    box-shadow: 0 26px 60px rgba(58, 47, 69, .28);
+    transition: transform .25s ease-out;
+  }
+
   /* ── intro message (after studio splash) ── */
   #introMsg {
     position: fixed; inset: 0; z-index: 10000;
-    background: linear-gradient(160deg, #fff7e0 0%, #ffe4f2 45%, #e3f7de 100%);
     display: none; align-items: center; justify-content: center;
-    padding: 24px; transition: opacity .8s ease;
+    padding: 24px; transition: opacity .8s ease; overflow: hidden;
   }
   #introMsg.show { display: flex; }
   #introMsg.hide { opacity: 0; pointer-events: none; }
 
   #introMsg .im-card {
     position: relative;
-    width: min(560px, 94vw);
-    background: var(--card);
-    border-radius: 26px;
-    padding: 38px 30px 30px;
-    box-shadow: 0 20px 55px rgba(255, 133, 194, .28);
+    width: min(580px, 94vw);
+    background: var(--i-cream);
+    border-radius: 28px;
+    padding: 40px 32px 32px;
+    box-shadow: 0 24px 65px rgba(58, 47, 69, .25);
     opacity: 0; transform: scale(.9) translateY(10px);
     animation: imCardPop .6s cubic-bezier(.34,1.4,.64,1) forwards;
   }
   @keyframes imCardPop { to { opacity: 1; transform: scale(1) translateY(0); } }
 
   #introMsg .im-badge-top {
-    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 18px;
-    background: linear-gradient(135deg, var(--pink), var(--yellow));
+    width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 18px;
+    background: linear-gradient(135deg, var(--i-coral), var(--i-lavender));
     display: flex; align-items: center; justify-content: center; font-size: 26px;
-    box-shadow: 0 8px 20px rgba(255,133,194,.35);
+    box-shadow: 0 10px 22px rgba(242, 96, 63, .3);
   }
 
   #introMsg .im-row {
     display: flex; align-items: flex-start; gap: 12px; text-align: left;
-    margin-bottom: 16px; min-height: 24px;
+    margin-bottom: 17px; min-height: 24px;
   }
   #introMsg .im-badge {
     flex: none; width: 30px; height: 30px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--green), var(--yellow));
+    background: linear-gradient(135deg, var(--i-mint), var(--i-yellow));
     display: flex; align-items: center; justify-content: center; font-size: 14px;
     opacity: 0; transform: scale(.5); transition: opacity .35s ease, transform .35s ease;
   }
   #introMsg .im-row.active .im-badge { opacity: 1; transform: scale(1); }
   #introMsg .im-text {
-    font-size: clamp(14px, 2.3vw, 16px); line-height: 1.65; color: var(--ink);
+    font-size: clamp(15px, 2.4vw, 17.5px); line-height: 1.65; color: var(--i-ink);
     padding-top: 4px;
   }
   #introMsg .im-text .cursor {
-    display: inline-block; width: 2px; height: 1em; background: var(--pink-deep);
+    display: inline-block; width: 2px; height: 1em; background: var(--i-coral-deep);
     margin-left: 2px; vertical-align: middle; animation: imBlink .8s steps(1) infinite;
   }
   @keyframes imBlink { 50% { opacity: 0; } }
 
-  #introMsg .im-final-wrap { text-align: center; margin-top: 18px; min-height: 74px; }
+  #introMsg .im-final-wrap { text-align: center; margin-top: 20px; min-height: 90px; }
   #introMsg .im-final {
-    display: inline-block; font-size: clamp(32px, 9vw, 50px); font-weight: 900; line-height: 1.15;
-    background: linear-gradient(90deg, var(--pink-deep), var(--yellow-deep), var(--green-deep));
+    display: inline-block; font-family: 'Fraunces', serif; font-style: italic;
+    font-size: clamp(34px, 10vw, 58px); font-weight: 900; line-height: 1.1;
+    background: linear-gradient(90deg, var(--i-coral-deep), var(--i-lavender-deep), var(--i-mint));
     -webkit-background-clip: text; background-clip: text; color: transparent;
     opacity: 0; transform: scale(.4) rotate(-4deg);
   }
@@ -97,12 +146,12 @@
   }
 
   #introMsg .im-ask-wrap {
-    margin-top: 24px; text-align: center;
+    margin-top: 26px; text-align: center;
     opacity: 0; transform: translateY(6px); pointer-events: none;
     transition: opacity .5s ease, transform .5s ease;
   }
   #introMsg .im-ask-wrap.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  #introMsg .im-ask-text { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 14px; }
+  #introMsg .im-ask-text { font-size: 14px; font-weight: 700; color: var(--i-ink); opacity: .7; margin-bottom: 14px; }
   #introMsg .im-ask-btns {
     position: relative; display: flex; align-items: center; justify-content: center;
     gap: 16px; min-height: 130px; overflow: hidden;
@@ -110,60 +159,56 @@
   #introMsg .im-no-btn { transition: left .18s ease, top .18s ease; }
   #introMsg .im-no-btn.dodging { position: absolute; }
 
+  #introMsg .btn-primary {
+    background: linear-gradient(90deg, var(--i-coral-deep), var(--i-lavender-deep));
+    box-shadow: 0 10px 24px rgba(242, 96, 63, .32);
+  }
+  #introMsg .btn-ghost { color: var(--i-ink); opacity: .6; }
+  #introMsg .btn-ghost:hover { opacity: 1; color: var(--i-coral-deep); }
+
   #introMsg .im-skip {
     position: absolute; top: 18px; right: 22px;
-    background: none; border: none; color: var(--muted);
+    background: none; border: none; color: var(--i-ink); opacity: .5;
     font-size: 12.5px; cursor: pointer; z-index: 1;
   }
-  #introMsg .im-skip:hover { color: var(--pink-deep); }
+  #introMsg .im-skip:hover { opacity: 1; color: var(--i-coral-deep); }
 
   /* ── studio presents splash ── */
   #splash {
     position: fixed; inset: 0; z-index: 10001;
-    background: radial-gradient(circle at center, #2d1f3d 0%, #140f1c 75%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     cursor: pointer; overflow: hidden;
     transition: opacity .8s ease;
   }
   #splash.hide { opacity: 0; pointer-events: none; }
-  #splash .rays {
-    position: absolute; inset: -60%;
-    background: conic-gradient(from 0deg,
-      transparent 0deg, rgba(255,202,58,.14) 12deg, transparent 24deg,
-      transparent 100deg, rgba(255,133,194,.12) 112deg, transparent 124deg,
-      transparent 220deg, rgba(127,214,122,.12) 232deg, transparent 244deg,
-      transparent 360deg);
-    animation: splashSpin 14s linear infinite;
-  }
-  @keyframes splashSpin { to { transform: rotate(360deg); } }
   #splash .logo-mark {
-    position: relative; font-size: 64px; opacity: 0; transform: scale(.4);
+    position: relative; font-size: 68px; opacity: 0; transform: scale(.4);
     animation: logoPop 1s ease forwards .2s;
-    filter: drop-shadow(0 0 22px rgba(255,202,58,.55));
+    filter: drop-shadow(0 10px 22px rgba(58, 47, 69, .3));
   }
   @keyframes logoPop { to { opacity: 1; transform: scale(1); } }
   #splash .studio-name {
-    position: relative; margin-top: 16px; font-size: clamp(20px, 6vw, 36px);
-    font-weight: 900; letter-spacing: 6px; text-transform: uppercase;
-    background: linear-gradient(90deg, #ffd76a, #fff2c2, #ffd76a);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+    position: relative; margin-top: 18px; font-family: 'Fraunces', serif;
+    font-size: clamp(26px, 7.5vw, 46px); font-weight: 900; letter-spacing: 2px;
+    color: var(--i-ink);
     opacity: 0; animation: splashFadeUp .9s ease forwards 1s;
   }
   #splash .presents {
-    position: relative; margin-top: 6px; font-size: 14px; letter-spacing: 5px;
-    color: #cdb9d9; font-style: italic; text-transform: uppercase;
+    position: relative; margin-top: 8px; font-size: 14px; letter-spacing: 6px;
+    color: var(--i-coral-deep); font-style: italic; text-transform: uppercase; font-weight: 600;
     opacity: 0; animation: splashFadeUp .9s ease forwards 1.9s;
   }
   #splash .movie-title {
-    position: relative; margin-top: 36px; font-size: clamp(19px, 5vw, 28px);
-    font-weight: 800; color: #fff; text-align: center; padding: 0 20px;
+    position: relative; margin-top: 40px; font-family: 'Fraunces', serif;
+    font-size: clamp(24px, 6.5vw, 38px); font-weight: 800; font-style: italic;
+    color: var(--i-lavender-deep); text-align: center; padding: 0 20px;
     opacity: 0; transform: scale(.85); animation: splashTitlePop 1s ease forwards 2.7s;
   }
   @keyframes splashFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes splashTitlePop { to { opacity: 1; transform: scale(1); } }
   #splash .skip-hint {
-    position: absolute; bottom: 26px; font-size: 12px; color: #8a7a95;
-    opacity: 0; animation: splashFadeUp .6s ease forwards 3.4s;
+    position: absolute; bottom: 26px; font-size: 12px; color: var(--i-ink); opacity: 0;
+    animation: splashFadeUp .6s ease forwards 3.4s;
   }
 
   .floaters { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
@@ -343,16 +388,20 @@
 </head>
 <body>
 
-<div id="splash">
-  <div class="rays"></div>
+<div id="splash" class="event-bg">
+  <div class="event-parallax" id="splashParallax">
+    <div class="event-blob" id="splashBlob"></div>
+    <img class="event-photo" id="splashPhoto" src="hero.jpg" alt="" onerror="this.style.display='none'">
+  </div>
   <div class="logo-mark">🧸</div>
   <div class="studio-name">Barış Studio</div>
   <div class="presents">presents</div>
   <div class="movie-title">Polen'in Doğum Günü 🍀</div>
   <div class="skip-hint">devam etmek için dokun</div>
+  <div class="event-grain"></div>
 </div>
 
-<div id="introMsg">
+<div id="introMsg" class="event-bg">
   <div class="im-card">
     <button class="im-skip" id="imSkipBtn">Atla ⏭</button>
     <div class="im-badge-top">🎁</div>
@@ -382,6 +431,7 @@
       </div>
     </div>
   </div>
+  <div class="event-grain"></div>
 </div>
 
 <div class="floaters" id="floaters"></div>
@@ -570,18 +620,30 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   splash.addEventListener("click", hideSplash);
   setTimeout(hideSplash, 4200);
 
-  /* ══════════════ intro message + mega celebration ══════════════ */
+  // subtle parallax: the coral/lavender/mint blob (and hero photo, once one
+  // exists at hero.jpg) drift opposite the cursor for a sense of depth
+  const splashBlob = document.getElementById("splashBlob");
+  const splashPhoto = document.getElementById("splashPhoto");
+  window.addEventListener("mousemove", (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 2;
+    const y = (e.clientY / window.innerHeight - 0.5) * 2;
+    splashBlob.style.transform = `translate(${x * 16}px, ${y * 16}px)`;
+    splashPhoto.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+  });
+
+  /* ══════════════ intro message + celebrations (real shapes, no emoji) ══════════════ */
+  const EVENT_PALETTE = ["#ff8266", "#f2603f", "#b8a4e3", "#8f6fce", "#8fe0c4", "#ffd76a", "#faf3e6"];
+  const EVENT_SHAPES = ["circle", "square", "star"];
+
   function megaCelebration() {
-    const bear = confetti.shapeFromText({ text: "🧸", scalar: 2.2 });
-    const elephant = confetti.shapeFromText({ text: "🐘", scalar: 2.2 });
-    confetti({ particleCount: 40, spread: 110, origin: { y: 0.5 }, shapes: [bear, elephant], scalar: 2.2 });
-    confetti({ particleCount: 160, spread: 130, origin: { y: 0.55 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
+    confetti({ particleCount: 70, spread: 110, origin: { y: 0.5 }, shapes: EVENT_SHAPES, scalar: 1.2, colors: EVENT_PALETTE });
+    confetti({ particleCount: 150, spread: 130, origin: { y: 0.55 }, shapes: ["square"], scalar: 0.9, colors: EVENT_PALETTE });
     let bursts = 0;
     const fw = setInterval(() => {
       confetti({
-        particleCount: 45, startVelocity: 32, spread: 360,
+        particleCount: 45, startVelocity: 32, spread: 360, shapes: EVENT_SHAPES,
         origin: { x: Math.random(), y: 0.2 + Math.random() * 0.4 },
-        colors: ["#ff85c2", "#ffca3a", "#7fd67a", "#ffffff"]
+        colors: EVENT_PALETTE
       });
       bursts++;
       if (bursts >= 6) clearInterval(fw);
@@ -589,40 +651,23 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   }
 
   // "Evet" dendiğinde patlayan büyük şölen: yukarıdan aşağı, aşağıdan yukarı
-  // konfetiler, ayıcık/eşek/fil/yonca/yaprak şekilleri ve kocaman havai fişekler.
+  // konfeti sağanağı ve kocaman, art arda gelen havai fişekler — gerçek
+  // geometrik konfeti şekilleriyle (emoji değil).
   function superCelebration() {
-    const shapes = [
-      confetti.shapeFromText({ text: "🧸", scalar: 2.4 }),
-      confetti.shapeFromText({ text: "🫏", scalar: 2.4 }),
-      confetti.shapeFromText({ text: "🐘", scalar: 2.4 }),
-      confetti.shapeFromText({ text: "🍀", scalar: 2 }),
-      confetti.shapeFromText({ text: "🍃", scalar: 2 })
-    ];
-    const palette = ["#ff85c2", "#ffca3a", "#7fd67a", "#9b5de5", "#ffffff"];
+    confetti({ particleCount: 150, spread: 170, origin: { x: 0.5, y: -0.05 }, startVelocity: 32, gravity: 0.9, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    confetti({ particleCount: 90, spread: 150, origin: { x: 0.5, y: -0.05 }, startVelocity: 36, gravity: 0.8, shapes: EVENT_SHAPES, scalar: 1.1, colors: EVENT_PALETTE });
 
-    // yukarıdan aşağı sağanak
-    confetti({ particleCount: 130, spread: 170, origin: { x: 0.5, y: -0.05 }, startVelocity: 30, gravity: 0.9, colors: palette });
-    confetti({ particleCount: 70, spread: 150, origin: { x: 0.5, y: -0.05 }, startVelocity: 35, gravity: 0.8, shapes, scalar: 2.2 });
+    confetti({ particleCount: 100, angle: 90, spread: 110, origin: { x: 0.5, y: 1.05 }, startVelocity: 62, gravity: 0.7, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    confetti({ particleCount: 70, angle: 60, spread: 70, origin: { x: 0, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
 
-    // aşağıdan yukarı fışkırma
-    confetti({ particleCount: 90, angle: 90, spread: 110, origin: { x: 0.5, y: 1.05 }, startVelocity: 60, gravity: 0.7, shapes, scalar: 2.2 });
-    confetti({ particleCount: 70, angle: 60, spread: 70, origin: { x: 0, y: 1.05 }, startVelocity: 65, colors: palette });
-    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 1.05 }, startVelocity: 65, colors: palette });
-
-    // kocaman, art arda gelen havai fişekler
     let count = 0;
     const fireworks = setInterval(() => {
       confetti({
-        particleCount: 130, startVelocity: 48, spread: 360, scalar: 1.5,
+        particleCount: 140, startVelocity: 50, spread: 360, scalar: 1.1, shapes: EVENT_SHAPES,
         origin: { x: Math.random(), y: 0.15 + Math.random() * 0.5 },
-        colors: palette
+        colors: EVENT_PALETTE
       });
-      if (Math.random() > 0.45) {
-        confetti({
-          particleCount: 22, spread: 360, scalar: 2.6, shapes,
-          origin: { x: Math.random(), y: 0.2 + Math.random() * 0.4 }
-        });
-      }
       count++;
       if (count >= 10) clearInterval(fireworks);
     }, 260);
