@@ -816,7 +816,7 @@
 
       <div class="nav-row">
         <button class="btn btn-ghost" onclick="goTo(1)">← Geri</button>
-        <button class="btn btn-primary" onclick="goToWithTransition(3, '🎯', 'Şimdi sıra Quiz\'te!')">İleri →</button>
+        <button class="btn btn-primary" onclick="goToWithTransition(3, '🎯', 'Şimdi quiz zamanııı! Seni seven insanlar tarafından hazırlanmış soruları cevaplamanı isteyeceğim, bakalım hatırlayacak mısın? 🤔')">İleri →</button>
       </div>
     </div>
   </div>
@@ -1306,13 +1306,15 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     ptEmoji.textContent = emoji;
     ptText.textContent = text;
     pageTransition.classList.add("show");
+    // longer messages need more time on screen to actually be read
+    const holdMs = Math.max(1300, Math.min(text.length * 45, 3400));
     setTimeout(() => {
       goTo(target);
       setTimeout(() => {
         pageTransition.classList.remove("show");
         transitionBusy = false;
       }, 200);
-    }, 1300);
+    }, holdMs);
   }
 
 
