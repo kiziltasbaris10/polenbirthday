@@ -784,7 +784,7 @@
   <div class="pt-text" id="ptText"></div>
 </div>
 
-<audio id="bgMusic" src="bg-music.mp3" loop preload="none"></audio>
+<audio id="bgMusic" src="bg-music.mp3" preload="none"></audio>
 <button id="musicToggle" class="music-toggle" aria-label="Müziği çal/durdur">🎵</button>
 
 <div class="people-overlay" id="peopleOverlay">
@@ -1393,7 +1393,11 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
      (the final screen's video, or a friend's video opened from "A Few Words
      From Your People"), the music auto-pauses; once that video pauses or
      ends, the music resumes right where it left off — but only if it was
-     actually playing before, so a manual pause is respected. */
+     actually playing before, so a manual pause is respected.
+     Two songs play back to back as a little playlist, looping to the first
+     one again once the second finishes. */
+  const musicPlaylist = ["bg-music.mp3", "bg-music-2.mp3"];
+  let musicTrackIndex = 0;
   const bgMusic = document.getElementById("bgMusic");
   const musicToggle = document.getElementById("musicToggle");
   let musicWasPlayingBeforeVideo = false;
@@ -1409,6 +1413,11 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   bgMusic.addEventListener("pause", () => {
     musicToggle.classList.remove("playing");
     musicToggle.textContent = "🎵";
+  });
+  bgMusic.addEventListener("ended", () => {
+    musicTrackIndex = (musicTrackIndex + 1) % musicPlaylist.length;
+    bgMusic.src = musicPlaylist[musicTrackIndex];
+    bgMusic.play().catch(() => {});
   });
 
   // "play"/"pause"/"ended" don't bubble, but a capturing listener on
