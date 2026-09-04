@@ -545,6 +545,19 @@
   /* ── final ── */
   .final-emojis { font-size: 50px; text-align: center; margin-bottom: 6px; }
 
+  /* final screen chaos: emoji/flags rising and spinning everywhere */
+  .final-chaos { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .final-chaos span {
+    position: absolute; bottom: -80px; opacity: 0; will-change: transform, opacity;
+    animation: finalRiseSpin linear infinite;
+  }
+  @keyframes finalRiseSpin {
+    0%   { transform: translateY(0) rotate(0deg) scale(.8); opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { transform: translateY(-115vh) rotate(360deg) scale(1.15); opacity: 0; }
+  }
+
   footer { text-align: center; padding: 30px 20px 10px; color: var(--muted); font-size: 13px; position: relative; z-index: 1; }
 </style>
 </head>
@@ -806,9 +819,10 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
 
   <!-- 8. FINAL SCREEN -->
   <div class="screen" id="screen-7">
+    <div class="final-chaos" id="finalChaos"></div>
     <div class="card center">
       <div class="final-emojis">🎉🐘🍀💛</div>
-      <h1>İyi ki Doğdun<br>Polen!</h1>
+      <h1>İyi ki Doğdun<br>sevgilimmm</h1>
       <p class="sub">26 yaşın; şansın, gülüşün ve sevdiğin o açık renkler kadar güzel geçsin. Bu küçük site, seni ne kadar çok düşündüğümün minik bir kanıtı sadece 💕</p>
       <div class="nav-row" style="justify-content:center; gap:14px">
         <button class="btn btn-ghost" onclick="goTo(6)">← Geri</button>
@@ -1047,6 +1061,32 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     setTimeout(() => safeConfetti({ particleCount: 90, angle: 120, spread: 70, origin: { x: 1 } }), 200);
   }
 
+  /* ══════════════ final screen: emoji/flag chaos + fireworks ══════════════ */
+  const FINAL_EMOJI_POOL = ["🧸", "🍓", "🫏", "🇨🇦", "🇮🇹", "🇧🇦", "🇦🇱", "🇲🇪", "🎆", "🧨", "🐘", "✨"];
+  const finalChaos = document.getElementById("finalChaos");
+  for (let i = 0; i < 42; i++) {
+    const s = document.createElement("span");
+    s.textContent = FINAL_EMOJI_POOL[Math.floor(Math.random() * FINAL_EMOJI_POOL.length)];
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.fontSize = (16 + Math.random() * 24) + "px";
+    s.style.animationDuration = (4.5 + Math.random() * 6) + "s";
+    s.style.animationDelay = (Math.random() * 9) + "s";
+    finalChaos.appendChild(s);
+  }
+
+  function finalFireworks() {
+    let count = 0;
+    const fw = setInterval(() => {
+      safeConfetti({
+        particleCount: 100, startVelocity: 48, spread: 360, scalar: 1.15,
+        origin: { x: Math.random(), y: 0.15 + Math.random() * 0.55 },
+        colors: ["#ff85c2", "#ffca3a", "#7fd67a", "#b8a4e3", "#ff8266", "#ffffff"]
+      });
+      count++;
+      if (count >= 8) clearInterval(fw);
+    }, 260);
+  }
+
   /* ══════════════ screen navigation ══════════════ */
   const screenIds = ["screen-0","screen-1","screen-2","screen-3","screen-4","screen-5","screen-6","screen-7"];
   let current = 0;
@@ -1069,6 +1109,7 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     });
     // safety net: leaving the mini game mid-touch should never leave page scroll locked
     if (current !== 2) document.body.classList.remove("game-scroll-lock");
+    if (current === 7) finalFireworks();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
