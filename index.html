@@ -350,8 +350,9 @@
   .pf-stage {
     position: relative; width: 100%; border-radius: 18px; overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,.12); background: #bfe3f5; line-height: 0;
+    touch-action: none;
   }
-  #pfCanvas { display: block; width: 100%; height: auto; touch-action: none; }
+  #pfCanvas { display: block; width: 100%; height: auto; touch-action: none; outline: none; }
 
   .pf-toast {
     position: absolute; left: 50%; top: 14px; transform: translate(-50%, -14px);
@@ -377,8 +378,8 @@
   .pf-end-title { font-size: 22px; font-weight: 900; color: var(--pink-deep); margin-top: 6px; }
   .pf-end-sub { font-size: 14px; color: var(--muted); margin: 8px 0 18px; }
 
-  .pf-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 14px; }
-  .pf-dpad { display: flex; gap: 10px; }
+  .pf-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 14px; touch-action: none; }
+  .pf-dpad { display: flex; gap: 10px; touch-action: none; }
   .pf-btn {
     -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none;
     border: none; border-radius: 18px; cursor: pointer;
@@ -568,7 +569,7 @@
       </div>
 
       <div class="pf-stage" id="pfStage">
-        <canvas id="pfCanvas"></canvas>
+        <canvas id="pfCanvas" tabindex="0"></canvas>
         <div class="pf-toast" id="pfToast">Nope, birthdays don't have game overs 😄</div>
 
         <div class="pf-end" id="pfEnd">
@@ -1000,13 +1001,15 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       { x: 1820, y: 168, w: 130, h: 16 }
     ];
     const SIGNS = [
-      { x: 70, text: "Little Polen started here." },
+      { x: 70, text: "Little Polen came to the world on Sept 5, 2000." },
+      { x: 320, text: "Then she started elementary school." },
+      { x: 570, text: "Then she went to high school." },
       { x: 830, text: "Then came the university years." },
       { x: 1590, text: "A new chapter in Italy." },
       { x: 2350, text: "And now… Level 26." }
     ];
     const COLLECTIBLE_DEFS = [
-      { x: 260, y: GROUND_Y - 40 },
+      { x: 190, y: GROUND_Y - 40 },
       { x: 1010, y: GROUND_Y - 40 },
       { x: 1085, y: 148 },
       { x: 1790, y: GROUND_Y - 40 },
@@ -1049,32 +1052,65 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     const keys = { left: false, right: false };
     let jumpQueued = false;
 
-    function isGameScreenActive() { return current === 2; }
+    // checks the DOM directly (not a possibly-stale closure variable) so
+    // this is always right about whether the Mini Game screen is on screen
+    function isGameScreenActive() {
+      const el = document.getElementById("screen-2");
+      return !!el && el.classList.contains("active");
+    }
 
-    window.addEventListener("keydown", (e) => {
+    const MOVE_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"];
+    function handleKeydown(e) {
       if (!isGameScreenActive()) return;
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"].includes(e.code)) e.preventDefault();
+      if (MOVE_KEYS.includes(e.code)) e.preventDefault();
       if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = true;
       if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = true;
       if (e.code === "ArrowUp" || e.code === "KeyW" || e.code === "Space") jumpQueued = true;
-    });
-    window.addEventListener("keyup", (e) => {
+    }
+    function handleKeyup(e) {
       if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = false;
       if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = false;
-    });
+    }
+    // bound on both window and the canvas itself, so focus quirks on any
+    // one element can't stop the game from receiving arrow-key input
+    window.addEventListener("keydown", handleKeydown);
+    window.addEventListener("keyup", handleKeyup);
+    canvas.addEventListener("keydown", handleKeydown);
+    canvas.addEventListener("keyup", handleKeyup);
 
     // mobile touch controls — large buttons, and page scroll is locked only
-    // while a control is actually being pressed
+    // while a control is actually being pressed. Both pointer and touch
+    // listeners are wired (guarded so a single press only counts once) since
+    // real-world mobile browsers aren't fully consistent about honoring
+    // touch-action on their own.
     let lockCount = 0;
     function lockScroll() { lockCount++; document.body.classList.add("game-scroll-lock"); }
     function unlockScroll() { lockCount = Math.max(0, lockCount - 1); if (lockCount === 0) document.body.classList.remove("game-scroll-lock"); }
     function bindHoldButton(btn, onDown, onUp) {
-      const down = (e) => { e.preventDefault(); lockScroll(); onDown(); };
-      const up = (e) => { e.preventDefault(); unlockScroll(); onUp(); };
+      let pressed = false;
+      const down = (e) => {
+        e.preventDefault();
+        if (pressed) return;
+        pressed = true;
+        lockScroll();
+        onDown();
+      };
+      const up = (e) => {
+        e.preventDefault();
+        if (!pressed) return;
+        pressed = false;
+        unlockScroll();
+        onUp();
+      };
       btn.addEventListener("pointerdown", down);
       btn.addEventListener("pointerup", up);
       btn.addEventListener("pointercancel", up);
       btn.addEventListener("pointerleave", up);
+      btn.addEventListener("touchstart", down, { passive: false });
+      btn.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+      btn.addEventListener("touchend", up, { passive: false });
+      btn.addEventListener("touchcancel", up, { passive: false });
+      btn.addEventListener("contextmenu", (e) => e.preventDefault());
     }
     bindHoldButton(leftBtn, () => { keys.left = true; }, () => { keys.left = false; });
     bindHoldButton(rightBtn, () => { keys.right = true; }, () => { keys.right = false; });
@@ -1094,6 +1130,10 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       canvas.height = Math.round(cssH * dpr);
       const scale = (cssW / VIEW_W) * dpr;
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      // the stage only reaches a real size once the Mini Game screen becomes
+      // visible — that's also the right moment to move keyboard focus onto
+      // the canvas (off whatever nav button was clicked to get here)
+      if (isGameScreenActive()) canvas.focus({ preventScroll: true });
     }
     if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(stage);
     else window.addEventListener("resize", resizeCanvas);
@@ -1309,14 +1349,14 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
 
     function drawSign(x, groundY, text) {
       ctx.fillStyle = "#c9a27a";
-      ctx.fillRect(x - 2, groundY - 46, 4, 46);
+      ctx.fillRect(x - 2, groundY - 40, 4, 40);
       ctx.fillStyle = "#fff9ee";
-      roundRect(x - 58, groundY - 76, 116, 34, 8); ctx.fill();
-      ctx.strokeStyle = "#e9c9a0"; ctx.lineWidth = 2; roundRect(x - 58, groundY - 76, 116, 34, 8); ctx.stroke();
+      roundRect(x - 64, groundY - 90, 128, 50, 8); ctx.fill();
+      ctx.strokeStyle = "#e9c9a0"; ctx.lineWidth = 2; roundRect(x - 64, groundY - 90, 128, 50, 8); ctx.stroke();
       ctx.fillStyle = "#4a3b45";
-      ctx.font = "700 10.5px 'Segoe UI', sans-serif";
+      ctx.font = "700 10px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      wrapText(text, x, groundY - 62, 100, 12);
+      wrapText(text, x, groundY - 75, 112, 12);
     }
 
     function wrapText(text, cx, y, maxW, lineH) {
@@ -1369,27 +1409,62 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       ctx.translate(cx, cy - P_H / 2);
       ctx.scale(player.facing * (0.9 + 0.1 * squash), squash);
 
-      // body
-      ctx.fillStyle = "#ff8266";
-      roundRect(-P_W / 2, -P_H / 2, P_W, P_H, 12); ctx.fill();
-      // little feet
+      // little princess — an original, generic design (no franchise likeness):
+      // A-line dress, simple hair, and a small crown.
+      const headCy = -P_H / 2 + 7;
+
+      // dress (A-line skirt, widens toward the hem)
+      ctx.fillStyle = "#ff8fc7";
+      ctx.beginPath();
+      ctx.moveTo(-6, headCy + 7);
+      ctx.lineTo(6, headCy + 7);
+      ctx.lineTo(13, P_H / 2 - 3);
+      ctx.lineTo(-13, P_H / 2 - 3);
+      ctx.closePath();
+      ctx.fill();
+      // sash
+      ctx.fillStyle = "#b8a4e3";
+      ctx.fillRect(-6, headCy + 7, 12, 3);
+
+      // little feet peeking from under the hem
       if (player.grounded) {
-        ctx.fillStyle = "#e8664a";
+        ctx.fillStyle = "#8f6fce";
         const legOffset = Math.abs(player.vx) > 0.1 ? Math.sin(player.walkPhase * 6) * 4 : 0;
-        roundRect(-9 + legOffset, P_H / 2 - 6, 8, 8, 3); ctx.fill();
-        roundRect(1 - legOffset, P_H / 2 - 6, 8, 8, 3); ctx.fill();
+        roundRect(-9 + legOffset, P_H / 2 - 6, 8, 7, 3); ctx.fill();
+        roundRect(1 - legOffset, P_H / 2 - 6, 8, 7, 3); ctx.fill();
       }
+
+      // hair (simple side locks, behind the head)
+      ctx.fillStyle = "#8a5a3a";
+      ctx.beginPath(); ctx.ellipse(-7, headCy + 2, 3.4, 7.5, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(7, headCy + 2, 3.4, 7.5, -0.3, 0, Math.PI * 2); ctx.fill();
+
+      // head
+      ctx.fillStyle = "#ffd7b8";
+      ctx.beginPath(); ctx.arc(0, headCy, 7.5, 0, Math.PI * 2); ctx.fill();
+
       // face
       ctx.fillStyle = "#3a2f38";
-      ctx.beginPath(); ctx.arc(-5, -3, 2, 0, Math.PI * 2); ctx.arc(6, -3, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "#3a2f38"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.arc(0, 1, 5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
-      // little bow, an original touch — not any existing character
-      ctx.fillStyle = "#b8a4e3";
-      ctx.beginPath(); ctx.moveTo(-3, -P_H / 2 - 1); ctx.lineTo(-10, -P_H / 2 - 7); ctx.lineTo(-10, -P_H / 2 + 5); ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(3, -P_H / 2 - 1); ctx.lineTo(10, -P_H / 2 - 7); ctx.lineTo(10, -P_H / 2 + 5); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "#8f6fce";
-      ctx.beginPath(); ctx.arc(0, -P_H / 2 - 1, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-3.2, headCy - 1, 1.6, 0, Math.PI * 2); ctx.arc(3.2, headCy - 1, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#3a2f38"; ctx.lineWidth = 1.4; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.arc(0, headCy + 2, 3, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+
+      // crown
+      ctx.fillStyle = "#ffd76a";
+      ctx.beginPath();
+      ctx.moveTo(-7, headCy - 6);
+      ctx.lineTo(-7, headCy - 13);
+      ctx.lineTo(-3.5, headCy - 8);
+      ctx.lineTo(0, headCy - 16);
+      ctx.lineTo(3.5, headCy - 8);
+      ctx.lineTo(7, headCy - 13);
+      ctx.lineTo(7, headCy - 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#f2603f";
+      [[-7, headCy - 13], [0, headCy - 16], [7, headCy - 13]].forEach(([gx, gy]) => {
+        ctx.beginPath(); ctx.arc(gx, gy, 1.3, 0, Math.PI * 2); ctx.fill();
+      });
 
       ctx.restore();
     }
