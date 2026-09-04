@@ -447,7 +447,25 @@
     width: 100%; min-height: 90px; border-radius: 14px; border: 2px solid #f3e0ec;
     padding: 12px 14px; font-family: inherit; font-size: 14.5px; resize: vertical;
   }
-  .wish-sent { display: none; text-align: center; margin-top: 14px; color: var(--pink-deep); font-weight: 800; }
+
+  /* thoughts rising up to the stars, once a wish is made */
+  .wish-star {
+    position: fixed; pointer-events: none; font-size: 15px; z-index: 500; opacity: 0;
+    animation: wishStarRise 2.3s ease-out forwards;
+  }
+  @keyframes wishStarRise {
+    0% { opacity: 0; transform: translate(0, 0) scale(.4) rotate(0deg); }
+    12% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--driftX, 0px), -280px) scale(1.15) rotate(200deg); }
+  }
+
+  .wish-consent { margin-top: 18px; display: none; text-align: center; }
+  .wish-consent.show { display: block; animation: pop .5s ease; }
+  .wish-consent-text { font-size: 14px; color: var(--muted); font-weight: 700; margin-bottom: 12px; }
+  .wish-consent-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+  .wish-result { display: none; text-align: center; margin-top: 14px; color: var(--pink-deep); font-weight: 800; }
+  .wish-result.show { display: block; animation: pop .5s ease; }
 
   /* ── final ── */
   .final-emojis { font-size: 50px; text-align: center; margin-bottom: 6px; }
@@ -667,10 +685,19 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
       <div class="cake">🎂</div>
 
       <div class="wish-box" id="wishBox">
-        <p class="sub">Hepsini söndürdün! Şimdi aklından geçen dileği aşağıya yaz — bu sadece senin sırrın, kimseyle paylaşılmayacak 🤫</p>
+        <p class="sub">Hepsini söndürdün! Şimdi aklından geçen dileği aşağıya yaz — düşüncelerin yıldızlara yükselsin ✨ Dileğin tamamen sana ait; istersen kendine saklarsın, istersen benimle de paylaşırsın, seçim senin.</p>
         <textarea class="wish-input" id="wishInput" placeholder="Dileğim..."></textarea>
-        <button class="btn btn-primary" style="margin-top:12px" onclick="sendWish()">Dileğimi Tuttum ✨</button>
-        <div class="wish-sent" id="wishSent">Dileğin uçtu gitti, gerçekleşmesi umuduyla 🎈</div>
+        <button class="btn btn-primary" style="margin-top:12px" id="wishSubmitBtn">Dileğimi Tuttum ✨</button>
+
+        <div class="wish-consent" id="wishConsent">
+          <div class="wish-consent-text">Bunu Barış'la da paylaşmak ister misin?</div>
+          <div class="wish-consent-btns">
+            <button class="btn btn-primary" id="wishShareYes">Evet, paylaş 💌</button>
+            <button class="btn btn-ghost" id="wishShareNo">Hayır, özel kalsın</button>
+          </div>
+        </div>
+
+        <div class="wish-result" id="wishResult"></div>
       </div>
 
       <div class="nav-row">
@@ -725,12 +752,19 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   const EVENT_PALETTE = ["#ff8266", "#f2603f", "#b8a4e3", "#8f6fce", "#8fe0c4", "#ffd76a", "#faf3e6"];
   const EVENT_SHAPES = ["circle", "square", "star"];
 
+  // confetti is purely decorative — if the CDN it loads from is ever blocked
+  // or slow (ad blocker, flaky network), a thrown error here must never be
+  // able to stop whatever functional code runs right after it
+  function safeConfetti(opts) {
+    try { if (typeof confetti === "function") confetti(opts); } catch (e) {}
+  }
+
   function megaCelebration() {
-    confetti({ particleCount: 70, spread: 110, origin: { y: 0.5 }, shapes: EVENT_SHAPES, scalar: 1.2, colors: EVENT_PALETTE });
-    confetti({ particleCount: 150, spread: 130, origin: { y: 0.55 }, shapes: ["square"], scalar: 0.9, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 70, spread: 110, origin: { y: 0.5 }, shapes: EVENT_SHAPES, scalar: 1.2, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 150, spread: 130, origin: { y: 0.55 }, shapes: ["square"], scalar: 0.9, colors: EVENT_PALETTE });
     let bursts = 0;
     const fw = setInterval(() => {
-      confetti({
+      safeConfetti({
         particleCount: 45, startVelocity: 32, spread: 360, shapes: EVENT_SHAPES,
         origin: { x: Math.random(), y: 0.2 + Math.random() * 0.4 },
         colors: EVENT_PALETTE
@@ -744,16 +778,16 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   // konfeti sağanağı ve kocaman, art arda gelen havai fişekler — gerçek
   // geometrik konfeti şekilleriyle (emoji değil).
   function superCelebration() {
-    confetti({ particleCount: 150, spread: 170, origin: { x: 0.5, y: -0.05 }, startVelocity: 32, gravity: 0.9, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
-    confetti({ particleCount: 90, spread: 150, origin: { x: 0.5, y: -0.05 }, startVelocity: 36, gravity: 0.8, shapes: EVENT_SHAPES, scalar: 1.1, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 150, spread: 170, origin: { x: 0.5, y: -0.05 }, startVelocity: 32, gravity: 0.9, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 90, spread: 150, origin: { x: 0.5, y: -0.05 }, startVelocity: 36, gravity: 0.8, shapes: EVENT_SHAPES, scalar: 1.1, colors: EVENT_PALETTE });
 
-    confetti({ particleCount: 100, angle: 90, spread: 110, origin: { x: 0.5, y: 1.05 }, startVelocity: 62, gravity: 0.7, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
-    confetti({ particleCount: 70, angle: 60, spread: 70, origin: { x: 0, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
-    confetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 100, angle: 90, spread: 110, origin: { x: 0.5, y: 1.05 }, startVelocity: 62, gravity: 0.7, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 70, angle: 60, spread: 70, origin: { x: 0, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+    safeConfetti({ particleCount: 70, angle: 120, spread: 70, origin: { x: 1, y: 1.05 }, startVelocity: 66, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
 
     let count = 0;
     const fireworks = setInterval(() => {
-      confetti({
+      safeConfetti({
         particleCount: 140, startVelocity: 50, spread: 360, scalar: 1.1, shapes: EVENT_SHAPES,
         origin: { x: Math.random(), y: 0.15 + Math.random() * 0.5 },
         colors: EVENT_PALETTE
@@ -848,7 +882,7 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
         numEl.style.display = "none";
         lblEl.style.display = "block";
         lblEl.className = "cd-slam";
-        confetti({ particleCount: 180, spread: 130, startVelocity: 55, ticks: 200, origin: { x: 0.5, y: 0.5 }, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
+        safeConfetti({ particleCount: 180, spread: 130, startVelocity: 55, ticks: 200, origin: { x: 0.5, y: 0.5 }, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
         setTimeout(() => {
           overlay.style.transition = "opacity .35s";
           overlay.style.opacity = "0";
@@ -911,9 +945,9 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   }
 
   function burstConfetti() {
-    confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
-    setTimeout(() => confetti({ particleCount: 90, angle: 60, spread: 70, origin: { x: 0 } }), 200);
-    setTimeout(() => confetti({ particleCount: 90, angle: 120, spread: 70, origin: { x: 1 } }), 200);
+    safeConfetti({ particleCount: 130, spread: 90, origin: { y: 0.6 }, colors: ["#ff85c2","#ffca3a","#7fd67a"] });
+    setTimeout(() => safeConfetti({ particleCount: 90, angle: 60, spread: 70, origin: { x: 0 } }), 200);
+    setTimeout(() => safeConfetti({ particleCount: 90, angle: 120, spread: 70, origin: { x: 1 } }), 200);
   }
 
   /* ══════════════ screen navigation ══════════════ */
@@ -1226,7 +1260,7 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
           cloverCountEl.textContent = collectedCount;
           SFX.play("collect");
           if (!reducedMotion) {
-            confetti({ particleCount: 22, spread: 50, startVelocity: 18, gravity: 1.1, origin: { x: 0.5, y: 0.4 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
+            safeConfetti({ particleCount: 22, spread: 50, startVelocity: 18, gravity: 1.1, origin: { x: 0.5, y: 0.4 }, colors: ["#ff85c2", "#ffca3a", "#7fd67a"] });
           }
         }
       }
@@ -1671,10 +1705,65 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     });
     candlesWrap.appendChild(c);
   }
-  function sendWish() {
-    document.getElementById("wishSent").style.display = "block";
-    burstConfetti();
+  // thoughts rising up toward the stars, spawned from wherever the wish was written
+  function spawnWishStars(originEl) {
+    const rect = originEl.getBoundingClientRect();
+    const symbols = ["✨", "⭐", "🌟", "💫"];
+    for (let i = 0; i < 10; i++) {
+      const star = document.createElement("span");
+      star.className = "wish-star";
+      star.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      star.style.left = (rect.left + Math.random() * rect.width) + "px";
+      star.style.top = (rect.top + Math.random() * rect.height) + "px";
+      star.style.setProperty("--driftX", (Math.random() * 120 - 60) + "px");
+      star.style.animationDelay = (Math.random() * 0.4) + "s";
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 2800);
+    }
   }
+
+  const wishInput = document.getElementById("wishInput");
+  const wishSubmitBtn = document.getElementById("wishSubmitBtn");
+  const wishConsent = document.getElementById("wishConsent");
+  const wishShareYes = document.getElementById("wishShareYes");
+  const wishShareNo = document.getElementById("wishShareNo");
+  const wishResult = document.getElementById("wishResult");
+
+  wishSubmitBtn.addEventListener("click", () => {
+    if (!wishInput.value.trim()) { wishInput.focus(); return; }
+    wishSubmitBtn.disabled = true;
+    wishInput.disabled = true;
+    setTimeout(() => wishConsent.classList.add("show"), 700);
+    spawnWishStars(wishInput);
+    burstConfetti();
+  });
+
+  // a real, honest choice — writing here never quietly leaves this device
+  // unless Polen says yes
+  wishShareYes.addEventListener("click", async () => {
+    wishShareYes.disabled = true;
+    wishShareNo.disabled = true;
+    wishResult.textContent = "Gönderiliyor...";
+    wishResult.classList.add("show");
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/kiziltasbaris10@gmail.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ _subject: "Polen'in Doğum Günü Dileği 💫", Dilek: wishInput.value.trim() })
+      });
+      if (!res.ok) throw new Error("network");
+      wishResult.textContent = "Barış'a gönderildi 💌";
+    } catch (e) {
+      wishResult.textContent = "Gönderilemedi ama dileğin kalbinde kaldı 🤍";
+    }
+    wishConsent.classList.remove("show");
+  });
+
+  wishShareNo.addEventListener("click", () => {
+    wishConsent.classList.remove("show");
+    wishResult.textContent = "Tamamen özel kaldı, kimseyle paylaşılmadı 🤍";
+    wishResult.classList.add("show");
+  });
 </script>
 
 </body>
