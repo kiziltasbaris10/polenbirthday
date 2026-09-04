@@ -465,8 +465,14 @@
   @keyframes bounceEl { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
 
   /* ── quiz ── */
-  .quiz-q { margin-bottom: 22px; }
-  .quiz-q .qtext { font-weight: 800; margin-bottom: 10px; font-size: 15px; }
+  .quiz-q { margin-bottom: 6px; animation: pop .35s ease; }
+  .quiz-meta { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 14px; }
+  .quiz-progress { font-size: 12px; font-weight: 800; color: var(--muted); }
+  .quiz-owner {
+    display: inline-block; background: var(--yellow); color: var(--ink);
+    font-size: 11.5px; font-weight: 800; padding: 4px 14px; border-radius: 999px;
+  }
+  .quiz-q .qtext { font-weight: 800; margin-bottom: 10px; font-size: 15px; text-align: center; }
   .quiz-opts { display: grid; gap: 8px; }
   .quiz-opt {
     text-align: left; padding: 11px 14px; border-radius: 12px; border: 2px solid #f3e0ec;
@@ -476,6 +482,14 @@
   .quiz-opt.correct { border-color: var(--green-deep); background: #eafbe8; }
   .quiz-opt.wrong { border-color: #e88; background: #fdeaea; }
   .quiz-opt.disabledOpt { pointer-events: none; }
+  .quiz-msg {
+    margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+    background: #fff7e0; border: 2px solid var(--yellow-deep);
+    font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.5;
+    opacity: 0; transform: translateY(6px); transition: opacity .35s ease, transform .35s ease;
+  }
+  .quiz-msg.show { opacity: 1; transform: translateY(0); }
+  .quiz-next-q-btn { margin-top: 16px; width: 100%; }
   .quiz-result { text-align: center; font-weight: 800; color: var(--pink-deep); margin-top: 6px; font-size: 16px; }
 
   /* ── words from people ── */
@@ -2002,22 +2016,96 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     requestAnimationFrame(loop);
   })();
 
-  /* ══════════════ 4. quiz ══════════════ */
+  /* ══════════════ 4. quiz — soruları Polen'i sevenler hazırladı, sırası
+     karıştırılmış. a bir sayı ya da (birden fazla doğru cevap kabul
+     edildiğinde) bir sayı dizisi olabilir. msg, cevap verildiğinde
+     gösterilen kişiye özel not. ══════════════ */
   const quiz = [
-    { q: "Polen bu yıl kaç yaşına giriyor?", opts: ["24", "25", "26", "27"], a: 2 },
-    { q: "Fillerin hafızasıyla ilgili hangisi doğru?", opts: ["Çok kısa sürede unuturlar", "Yıllarca hatırlayabilirler", "Hiç hatırlamazlar", "Sadece kokuları hatırlarlar"], a: 1 },
-    { q: "Mini oyunda Polen'in yolculuğu kaç bölümden geçiyor?", opts: ["2", "3", "4", "5"], a: 2 },
-    { q: "Dört yapraklı yonca bulmak genelde nasıldır?", opts: ["Çok sık rastlanır", "Oldukça nadirdir", "Hiç bulunmaz", "Sadece kışın çıkar"], a: 1 }
+    {
+      owner: "Yağmur'un Sorusu",
+      q: "O güzel kirpiklerin için anlaşma yaptığımız ve kağıt imzaladığımız yer neresiydi?",
+      opts: ["Sizin ev", "Bizim ev", "GTÜ kütüphane kantini", "İzmit'te bir kafe"],
+      a: 2,
+      msg: "Doğru cevap için tebrikler kardeşim, imza attığım en iyi kontrat. 🥰"
+    },
+    {
+      owner: "Barış'ın Sorusu",
+      q: "Como'da gece yarısı sokaklarda yürürken benim çıkardığım hayvan sesi neydi?",
+      opts: ["Koyun", "Köpek", "Kuş", "Kedi"],
+      a: 3,
+      msg: "meowwwww 🐱"
+    },
+    {
+      owner: "Pamir'in Sorusu",
+      q: "Küçükken hasta olduğumuzda ne yapardık?",
+      opts: ["Birbirimize ilaç verip doktorculuk oynardık", "Birbirimize meyve tabağı hazırlayıp iyileşirdik", "Battaniyenin altında film izleyip uyurduk", "Annemizden dondurma isterdik"],
+      a: 1,
+      msg: "Aferin Polen Su! 🍓 Bizim meyve tabaklarımız her hastalığın kesin çözümüydü. Doktorlara gerek yokmuş zaten. 😂🤍"
+    },
+    {
+      owner: "Ceren'in Sorusu",
+      q: "Güzeller güzeli evimizi tuttuğumuzda ilk ne yapılır?",
+      opts: ["Yeni eşyalar alınır", "Güzel bir yemek yenir", "Hayrına su dağıtılır", "Sevdiklerimize haber verilir"],
+      a: 2,
+      msg: "Ohhhh çok şükür! 💧"
+    },
+    {
+      owner: "Pamir'in Sorusu",
+      q: "Birbirimizi bir hayvana benzetecek olsak, bizim hayvanımız hangisi?",
+      opts: ["Panda 🐼", "Kedi 🐈", "Tospağ 🐢", "Penguen 🐧"],
+      a: 2,
+      msg: "TOSPAĞ! 🐢🤍 Bunu bilemediysen siteyi kapatıp geri dönüyoruz."
+    },
+    {
+      owner: "Barış'ın Sorusu",
+      q: "Pavia Duomo'da bana öğretmeye çalıştığın sure neydi?",
+      opts: ["Fatiha", "Nas", "Sübhaneke", "Kevser"],
+      a: [0, 2],
+      msg: "Hahahahahaha full paket bir manitaaa 😂"
+    },
+    {
+      owner: "Ceren'in Sorusu",
+      q: "Pavia'dan hiçbir şey almadığımız ikinci el pazarına güneşin altında çamurlu yollarda kaç km yürüdük?",
+      opts: ["3", "4", "6", "7"],
+      a: 3,
+      msg: "Doğru! Ama yine de otobüsle gitmekten daha hızlıydı 🥰"
+    },
+    {
+      owner: "Pamir'in Sorusu",
+      q: "Gece bir ses duyup çok korktuğumuzda, korktuğumuz kişinin aslında kim olduğunu öğrenmiştik?",
+      opts: ["Hırsız", "Komşumuz", "Bozacı", "Eve giren bir kedi"],
+      a: 2,
+      msg: "DOĞRU! 😂 Korkumuz meğer gece gece boza satan amcaymış. Hâlâ düşününce komik. Ee, boza abla! 😄"
+    },
+    {
+      owner: "Ceren'in Sorusu",
+      q: "İlk bilimsel deneyimiz sonucu keşfettiğimiz, İtalyanların ASIL kültürel objesi nedir?",
+      opts: ["El açması makarna", "North Face sırt çantası", "Moka pot", "Küçük kırmızı biber"],
+      a: 1,
+      msg: "Yüzlerceeee hem de! 🎒"
+    }
   ];
   const quizWrap = document.getElementById("quizWrap");
   const quizResult = document.getElementById("quizResult");
   const quizNextBtn = document.getElementById("quizNextBtn");
-  let answered = 0, correct = 0;
-  quiz.forEach((item, qi) => {
+  let quizIndex = 0, quizCorrect = 0;
+
+  function renderQuizQuestion() {
+    quizResult.textContent = "";
+    const item = quiz[quizIndex];
     const qDiv = document.createElement("div");
     qDiv.className = "quiz-q";
-    qDiv.innerHTML = `<div class="qtext">${qi + 1}. ${item.q}</div><div class="quiz-opts"></div>`;
+    qDiv.innerHTML = `
+      <div class="quiz-meta">
+        <span class="quiz-progress">${quizIndex + 1} / ${quiz.length}</span>
+        <span class="quiz-owner">${item.owner}</span>
+      </div>
+      <div class="qtext">${item.q}</div>
+      <div class="quiz-opts"></div>
+      <div class="quiz-msg" id="quizMsg"></div>
+    `;
     const optsDiv = qDiv.querySelector(".quiz-opts");
+    const isCorrectIdx = (oi) => Array.isArray(item.a) ? item.a.includes(oi) : oi === item.a;
     item.opts.forEach((opt, oi) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -2025,18 +2113,39 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
       b.textContent = opt;
       b.addEventListener("click", () => {
         [...optsDiv.children].forEach(c => c.classList.add("disabledOpt"));
-        if (oi === item.a) { b.classList.add("correct"); correct++; }
-        else { b.classList.add("wrong"); optsDiv.children[item.a].classList.add("correct"); }
-        answered++;
-        if (answered === quiz.length) {
-          quizResult.textContent = `${correct} / ${quiz.length} doğru! Kaç doğru bilirsen bil, bugün zaten kazanan sensin Polen 🎉`;
+        if (isCorrectIdx(oi)) {
+          b.classList.add("correct");
+          quizCorrect++;
+        } else {
+          b.classList.add("wrong");
+          [...optsDiv.children].forEach((c, ci) => { if (isCorrectIdx(ci)) c.classList.add("correct"); });
+        }
+
+        const msgEl = document.getElementById("quizMsg");
+        msgEl.textContent = item.msg;
+        msgEl.classList.add("show");
+
+        if (quizIndex < quiz.length - 1) {
+          const nextBtn = document.createElement("button");
+          nextBtn.type = "button";
+          nextBtn.className = "btn btn-primary quiz-next-q-btn";
+          nextBtn.textContent = "Sonraki Soru →";
+          nextBtn.addEventListener("click", () => {
+            quizIndex++;
+            renderQuizQuestion();
+          });
+          qDiv.appendChild(nextBtn);
+        } else {
+          quizResult.textContent = `${quizCorrect} / ${quiz.length} doğru! Kaç doğru bilirsen bil, bugün zaten kazanan sensin Polen 🎉`;
           quizNextBtn.disabled = false;
         }
       });
       optsDiv.appendChild(b);
     });
+    quizWrap.innerHTML = "";
     quizWrap.appendChild(qDiv);
-  });
+  }
+  renderQuizQuestion();
 
   /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
      Fill in message/photos/video as each friend's note comes in. photos is
