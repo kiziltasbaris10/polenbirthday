@@ -463,10 +463,14 @@
     font-size: 15px; line-height: 1.75; color: var(--ink); white-space: pre-line; margin-bottom: 16px;
   }
   .people-modal-message.placeholder { color: #c7a9bc; font-style: italic; }
-  .people-modal-photos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .people-modal-photos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 8px; }
   .people-modal-photos.single { grid-template-columns: 1fr; }
-  .people-modal-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
-  .people-modal-photos.single img { aspect-ratio: 4/3; }
+  .people-photo-item { display: flex; flex-direction: column; gap: 5px; }
+  .people-photo-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; display: block; }
+  .people-modal-photos.single .people-photo-item img { aspect-ratio: 4/3; }
+  .people-photo-caption {
+    font-size: 11.5px; line-height: 1.4; color: var(--muted); font-style: italic; font-family: 'Segoe UI', sans-serif;
+  }
   .people-modal-video {
     grid-column: 1 / -1; width: 100%; max-height: 60vh; border-radius: 12px;
     background: #000; margin-bottom: 4px;
@@ -1746,20 +1750,39 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
 
   /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
      Fill in message/photos/video as each friend's note comes in. photos is
-     an array of paths relative to index.html (e.g. ["friends/pamir1.jpg",
-     "friends/pamir2.jpg"]) — as many as they sent, or [] if none yet.
-     video is a single optional path, or "" if there isn't one. */
+     an array of { src, caption } — src is a path relative to index.html
+     (e.g. "friends/pamir1.jpg"), caption is optional per-photo text (leave
+     "" if that photo has no comment). video is a single optional path, or
+     "" if there isn't one. */
   const friendMessages = [
     { name: "Pamir", message: "", photos: [], video: "" },
     { name: "Yağmur", message: "", photos: [], video: "" },
     {
       name: "Ceren",
       message: "Birtaneciğimmm canım Polennnn 💕 üç yıl önce Caterina'nın gelip de \"arkada bir Türk kız daha var belki arkadaş olursunuz\" dediği an dün gibi aklımda. Dönüp baktığımda \"Ne kadar güzel bir enerjisi var\" demiş ve anında anlamıştım çok iyi anlaşacağımızı. Ama doğrusu bunca yaşadığımız anıyı inan hayal bile edemezdim 🥹 bir evde beraber geçirdiğimiz o harika yıllar, \"Gigi Hadid pasta yapıcam yer misin?\" yemekleri, \"Bir böcek gördüm sabah onu alır mısın 🥲\" yalvarışlarım, kilometrelerce yürüdüğümüz yollar, psikolojimizi bozan sınavlar, beraber çıktığımız tatiller, gidip gezdiğimiz onca güzel yerler, daha da güzeli bunları seninle yaşamak.. Her zaman aynı şeyi söylüyorum ama benim için sadece bir arkadaş bir dost değil, bir aile, bir evsin. Ve bir ömür hayatımın baş köşesinde senin kadar güzel enerjisi olan, harika bir insan olduğu için çok minnettarım 💕 iyi ki doğdun bebeğimmm doğum günün çok ama çok kutlu olsun. Nice nice çok mutlu yaşlara. Hayal ettiğin her şey en güzel haliyle hep karşına çıksın, seni çok çok seviyorummm 💕💕",
-      photos: ["friends/ceren1.jpg", "friends/ceren2.jpg", "friends/ceren3.jpg", "friends/ceren4.jpg", "friends/ceren5.jpg"],
+      photos: [
+        { src: "friends/ceren1.jpg", caption: "" },
+        { src: "friends/ceren2.jpg", caption: "" },
+        { src: "friends/ceren3.jpg", caption: "" },
+        { src: "friends/ceren4.jpg", caption: "" },
+        { src: "friends/ceren5.jpg", caption: "" }
+      ],
       video: "friends/ceren-video.mp4"
     },
-    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photos: ["friends/jovana.jpg"], video: "" },
-    { name: "Sofia", message: "Happy birthday Pretty Polen♥️♥️\nI miss you so much! All the moments with you were always so easy and happy, you could make even Pavia look sunny. I can't wait to see you again. Hopefully before your next birthday!!! (Cause I don't want to see you if you're old) Hehehehe kidding ♥️ enjoy your birthday, love! I wish you the best!!!✨✨", photos: [], video: "" }
+    {
+      name: "Jovana",
+      message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸",
+      photos: [{ src: "friends/jovana.jpg", caption: "" }],
+      video: ""
+    },
+    {
+      name: "Sofia",
+      message: "Happy birthday Pretty Polen♥️♥️\nI miss you so much! All the moments with you were always so easy and happy, you could make even Pavia look sunny. I can't wait to see you again. Hopefully before your next birthday!!! (Cause I don't want to see you if you're old) Hehehehe kidding ♥️ enjoy your birthday, love! I wish you the best!!!✨✨",
+      photos: [
+        { src: "friends/sofia1.jpg", caption: "This is the most bittersweet moment, when an era ended. You were so happy and all of us for you, but we knew this was also a goodbye" }
+      ],
+      video: ""
+    }
   ];
 
   const wordsGrid = document.getElementById("wordsGrid");
@@ -1784,11 +1807,20 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
       video.playsInline = true;
       peopleModalPhotos.appendChild(video);
     }
-    fm.photos.forEach((src) => {
+    fm.photos.forEach((p) => {
+      const item = document.createElement("div");
+      item.className = "people-photo-item";
       const img = document.createElement("img");
-      img.src = src;
+      img.src = p.src;
       img.alt = fm.name;
-      peopleModalPhotos.appendChild(img);
+      item.appendChild(img);
+      if (p.caption) {
+        const cap = document.createElement("div");
+        cap.className = "people-photo-caption";
+        cap.textContent = p.caption;
+        item.appendChild(cap);
+      }
+      peopleModalPhotos.appendChild(item);
     });
     peopleOverlay.classList.add("show");
   }
