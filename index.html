@@ -82,21 +82,24 @@
   /* ── intro message (after studio splash) ── */
   #introMsg {
     position: fixed; inset: 0; z-index: 10000;
-    display: none; align-items: center; justify-content: center;
-    padding: 24px; transition: opacity .8s ease; overflow: hidden;
+    display: none;
+    padding: 24px; transition: opacity .8s ease; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; perspective: 900px;
   }
-  #introMsg.show { display: flex; }
+  #introMsg.show { display: block; }
   #introMsg.hide { opacity: 0; pointer-events: none; }
 
   #introMsg .im-card {
     position: relative;
     width: min(580px, 94vw);
+    margin: 24px auto;
     background: var(--i-cream);
     border-radius: 28px;
-    padding: 40px 32px 32px;
+    padding: 34px 28px 28px;
     box-shadow: 0 24px 65px rgba(58, 47, 69, .25);
     opacity: 0; transform: scale(.9) translateY(10px);
     animation: imCardPop .6s cubic-bezier(.34,1.4,.64,1) forwards;
+    transition: transform .25s ease-out;
   }
   @keyframes imCardPop { to { opacity: 1; transform: scale(1) translateY(0); } }
 
@@ -105,19 +108,35 @@
     background: linear-gradient(135deg, var(--i-coral), var(--i-lavender));
     display: flex; align-items: center; justify-content: center; font-size: 26px;
     box-shadow: 0 10px 22px rgba(242, 96, 63, .3);
+    cursor: pointer; transition: transform .1s ease;
+  }
+  #introMsg .im-badge-top:active { transform: scale(.92); }
+  #introMsg .im-badge-top.bounce { animation: imBadgeTopBounce .5s ease; }
+  @keyframes imBadgeTopBounce {
+    0% { transform: scale(1) rotate(0); }
+    30% { transform: scale(1.25) rotate(-12deg); }
+    60% { transform: scale(.92) rotate(8deg); }
+    100% { transform: scale(1) rotate(0); }
   }
 
   #introMsg .im-row {
     display: flex; align-items: flex-start; gap: 12px; text-align: left;
-    margin-bottom: 17px; min-height: 24px;
+    margin-bottom: 14px; min-height: 24px;
   }
   #introMsg .im-badge {
     flex: none; width: 30px; height: 30px; border-radius: 50%;
     background: linear-gradient(135deg, var(--i-mint), var(--i-yellow));
     display: flex; align-items: center; justify-content: center; font-size: 14px;
-    opacity: 0; transform: scale(.5); transition: opacity .35s ease, transform .35s ease;
+    opacity: 0; transform: scale(.5);
   }
-  #introMsg .im-row.active .im-badge { opacity: 1; transform: scale(1); }
+  #introMsg .im-row.active .im-badge {
+    animation: imBadgePopIn .5s cubic-bezier(.34,1.6,.64,1) forwards;
+  }
+  @keyframes imBadgePopIn {
+    0% { opacity: 0; transform: scale(.3) rotate(-20deg); }
+    60% { opacity: 1; transform: scale(1.25) rotate(8deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
   #introMsg .im-text {
     font-size: clamp(15px, 2.4vw, 17.5px); line-height: 1.65; color: var(--i-ink);
     padding-top: 4px;
@@ -154,10 +173,16 @@
   #introMsg .im-ask-text { font-size: 14px; font-weight: 700; color: var(--i-ink); opacity: .7; margin-bottom: 14px; }
   #introMsg .im-ask-btns {
     position: relative; display: flex; align-items: center; justify-content: center;
-    gap: 16px; min-height: 130px; overflow: hidden;
+    gap: 16px; min-height: 160px; overflow: hidden;
   }
   #introMsg .im-no-btn { transition: left .18s ease, top .18s ease; }
   #introMsg .im-no-btn.dodging { position: absolute; }
+  #introMsg .im-no-btn.wiggle { animation: noBtnWiggle .35s ease; }
+  @keyframes noBtnWiggle {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    30% { transform: rotate(-10deg) scale(1.08); }
+    60% { transform: rotate(8deg) scale(1.05); }
+  }
 
   #introMsg .btn-primary {
     background: linear-gradient(90deg, var(--i-coral-deep), var(--i-lavender-deep));
@@ -180,6 +205,17 @@
     align-items: center; justify-content: center; flex-direction: column; gap: 14px;
   }
   #countdownOverlay.show { display: flex; }
+  #cdFlash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #cdFlash.pulse { animation: cdFlashPulse .35s ease-out; }
+  @keyframes cdFlashPulse { 0% { opacity: .55; } 100% { opacity: 0; } }
+  @keyframes bodyShake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-5px, 3px); }
+    40% { transform: translate(5px, -3px); }
+    60% { transform: translate(-4px, 4px); }
+    80% { transform: translate(4px, -4px); }
+  }
+  body.shake { animation: bodyShake .4s ease; }
   #cdNum {
     font-family: 'Fraunces', serif; font-weight: 900;
     font-size: clamp(120px, 32vw, 220px); line-height: 1; text-align: center;
@@ -211,6 +247,15 @@
     filter: drop-shadow(0 10px 22px rgba(58, 47, 69, .3));
   }
   @keyframes logoPop { to { opacity: 1; transform: scale(1); } }
+  #splash .logo-wiggle {
+    display: inline-block;
+    animation: logoWiggle 2.4s ease-in-out infinite 1.3s;
+  }
+  @keyframes logoWiggle {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    25% { transform: rotate(-9deg) translateY(-3px); }
+    75% { transform: rotate(9deg) translateY(-3px); }
+  }
   #splash .studio-name {
     position: relative; margin-top: 18px; font-family: 'Fraunces', serif;
     font-size: clamp(26px, 7.5vw, 46px); font-weight: 900; letter-spacing: 2px;
@@ -594,7 +639,7 @@
     <div class="event-blob" id="splashBlob"></div>
     <img class="event-photo" id="splashPhoto" src="hero.jpg" alt="" onerror="this.style.display='none'">
   </div>
-  <div class="logo-mark">🧸</div>
+  <div class="logo-mark"><span class="logo-wiggle">🧸</span></div>
   <div class="studio-name">Barış Studio</div>
   <div class="presents">presents</div>
   <div class="movie-title">Polen'in Doğum Günü 🍀</div>
@@ -603,9 +648,9 @@
 </div>
 
 <div id="introMsg" class="event-bg">
-  <div class="im-card">
+  <div class="im-card" id="imCard">
     <button class="im-skip" id="imSkipBtn">Atla ⏭</button>
-    <div class="im-badge-top">🎁</div>
+    <div class="im-badge-top" id="imBadgeTop">🎁</div>
 
     <div class="im-row" id="imRow1">
       <span class="im-badge">👋</span>
@@ -616,8 +661,12 @@
       <span class="im-text" id="imText2"></span>
     </div>
     <div class="im-row" id="imRow3">
-      <span class="im-badge">😴</span>
+      <span class="im-badge">🍿</span>
       <span class="im-text" id="imText3"></span>
+    </div>
+    <div class="im-row" id="imRow4">
+      <span class="im-badge">😴</span>
+      <span class="im-text" id="imText4"></span>
     </div>
 
     <div class="im-final-wrap">
@@ -625,7 +674,7 @@
     </div>
 
     <div class="im-ask-wrap" id="imAskWrap">
-      <p class="im-ask-text">Kendini hazır hissediyorsan başlayalım mı?</p>
+      <p class="im-ask-text">Gözlerini ovuşturdun mu? Hazırsan başlıyoruz 👇</p>
       <div class="im-ask-btns" id="imAskBtns">
         <button class="btn btn-primary" id="imYesBtn">Evet 🎉</button>
         <button class="btn btn-ghost im-no-btn" id="imNoBtn">Hayır</button>
@@ -636,6 +685,7 @@
 </div>
 
 <div id="countdownOverlay">
+  <div id="cdFlash"></div>
   <div id="cdNum"></div>
   <div id="cdLabel">BAŞLIYORUZ! 🎉</div>
 </div>
@@ -936,9 +986,28 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
         colors: EVENT_PALETTE
       });
       count++;
-      if (count >= 10) clearInterval(fireworks);
-    }, 260);
+      if (count >= 14) clearInterval(fireworks);
+    }, 240);
   }
+
+  // tap the gift badge on the intro card for a little bonus confetti pop
+  const imBadgeTop = document.getElementById("imBadgeTop");
+  imBadgeTop.addEventListener("click", () => {
+    imBadgeTop.classList.remove("bounce");
+    void imBadgeTop.offsetWidth;
+    imBadgeTop.classList.add("bounce");
+    safeConfetti({ particleCount: 26, spread: 55, origin: { y: 0.35 }, shapes: EVENT_SHAPES, colors: EVENT_PALETTE, scalar: .8 });
+  });
+
+  // subtle tilt on the intro card, following the cursor (desktop only — no-op on touch)
+  const imCard = document.getElementById("imCard");
+  imCard.addEventListener("mousemove", (e) => {
+    const r = imCard.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    imCard.style.transform = `rotateY(${px * 8}deg) rotateX(${-py * 8}deg)`;
+  });
+  imCard.addEventListener("mouseleave", () => { imCard.style.transform = ""; });
 
   const introMsg = document.getElementById("introMsg");
   const imAskWrap = document.getElementById("imAskWrap");
@@ -977,11 +1046,15 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
 
     await sleep(300);
     document.getElementById("imRow2").classList.add("active");
-    await typeText(document.getElementById("imText2"), "Bu sayfa, seni çok seven erkek arkadaşın tarafından günlerce çalışılarak hazırlanmıştır.", 22);
+    await typeText(document.getElementById("imText2"), "Bu sayfa, seni çok seven erkek arkadaşın tarafından günlerce göz nuru dökülerek hazırlandı.", 22);
 
     await sleep(300);
     document.getElementById("imRow3").classList.add("active");
-    await typeText(document.getElementById("imText3"), "Kemerini bağla... uykun var biliyorum ama bugün uyuma günü değil,", 22);
+    await typeText(document.getElementById("imText3"), "İçeride mini oyunlar, bir quiz, sürpriz mesajlar ve kalbini eritecek bir mektup seni bekliyor.", 22);
+
+    await sleep(300);
+    document.getElementById("imRow4").classList.add("active");
+    await typeText(document.getElementById("imText4"), "Kemerini bağla... uykun var biliyorum ama bugün uyuma günü değil,", 22);
 
     await sleep(450);
     const finalEl = document.getElementById("imFinal");
@@ -1025,6 +1098,13 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
         numEl.style.display = "none";
         lblEl.style.display = "block";
         lblEl.className = "cd-slam";
+        const cdFlash = document.getElementById("cdFlash");
+        cdFlash.classList.remove("pulse");
+        void cdFlash.offsetWidth;
+        cdFlash.classList.add("pulse");
+        document.body.classList.remove("shake");
+        void document.body.offsetWidth;
+        document.body.classList.add("shake");
         safeConfetti({ particleCount: 180, spread: 130, startVelocity: 55, ticks: 200, origin: { x: 0.5, y: 0.5 }, shapes: EVENT_SHAPES, colors: EVENT_PALETTE });
         setTimeout(() => {
           overlay.style.transition = "opacity .35s";
@@ -1061,14 +1141,57 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   imSkipBtn.addEventListener("click", hideIntroMsg);
 
   // "Hayır" imkansız: üstüne gelindiğinde kutunun içinde rastgele bir yere kaçar
+  // ve her kaçışta değişen şakacı bir yazıyla dalga geçer.
+  // Kaçış alanı ilk kaçışta (Hayır butonu akıştan çıkmadan önce) bir kere
+  // ölçülüp saklanır — yoksa buton akıştan çıktıkça kutu küçülür ve rastgele
+  // konum "Evet" butonunun üstüne denk gelip onu tıklanamaz hale getirebilir.
+  const noTaunts = ["Yakala 😜", "Olmaz 🙅", "Tekrar? 😏", "Pes yok 😄", "Kaçtım 🏃", "Dokun 😝"];
+  let noTauntIdx = -1;
+  let dodgeAreaRect = null;
   function dodgeNoBtn() {
-    const wrapRect = imAskBtns.getBoundingClientRect();
-    const btnRect = imNoBtn.getBoundingClientRect();
-    const maxX = Math.max(wrapRect.width - btnRect.width, 0);
-    const maxY = Math.max(wrapRect.height - btnRect.height, 0);
+    if (!dodgeAreaRect) dodgeAreaRect = imAskBtns.getBoundingClientRect();
+
+    // swap the text in first — a longer taunt widens the button, and that
+    // width must be known before picking a safe (non-overlapping) spot
+    noTauntIdx = (noTauntIdx + 1) % noTaunts.length;
+    imNoBtn.textContent = noTaunts[noTauntIdx];
     imNoBtn.classList.add("dodging");
-    imNoBtn.style.left = Math.random() * maxX + "px";
-    imNoBtn.style.top = Math.random() * maxY + "px";
+    const btnRect = imNoBtn.getBoundingClientRect();
+    const w = btnRect.width, h = btnRect.height;
+    const areaW = dodgeAreaRect.width, areaH = dodgeAreaRect.height;
+
+    const yesRect = imYesBtn.getBoundingClientRect();
+    const yesLeft = yesRect.left - dodgeAreaRect.left;
+    const yesTop = yesRect.top - dodgeAreaRect.top;
+    const yesRight = yesLeft + yesRect.width;
+    const yesBottom = yesTop + yesRect.height;
+
+    // build safe bands that are guaranteed not to overlap "Evet", then pick
+    // randomly among whichever ones actually fit the (taunt-dependent) size —
+    // simple random-retry isn't enough because a wide taunt can make every
+    // random spot overlap "Evet" no matter how many times it's retried
+    const bands = [];
+    if (yesLeft >= w) bands.push({ x0: 0, x1: yesLeft - w, y0: 0, y1: Math.max(areaH - h, 0) });
+    if (areaW - yesRight >= w) bands.push({ x0: yesRight, x1: areaW - w, y0: 0, y1: Math.max(areaH - h, 0) });
+    if (yesTop >= h) bands.push({ x0: 0, x1: Math.max(areaW - w, 0), y0: 0, y1: yesTop - h });
+    if (areaH - yesBottom >= h) bands.push({ x0: 0, x1: Math.max(areaW - w, 0), y0: yesBottom, y1: areaH - h });
+
+    let x, y;
+    if (bands.length) {
+      const b = bands[Math.floor(Math.random() * bands.length)];
+      x = b.x0 + Math.random() * Math.max(b.x1 - b.x0, 0);
+      y = b.y0 + Math.random() * Math.max(b.y1 - b.y0, 0);
+    } else {
+      // extremely tight space: tuck into whichever corner is farthest from Evet
+      x = (yesLeft + yesRight) / 2 < areaW / 2 ? Math.max(areaW - w, 0) : 0;
+      y = (yesTop + yesBottom) / 2 < areaH / 2 ? Math.max(areaH - h, 0) : 0;
+    }
+
+    imNoBtn.style.left = x + "px";
+    imNoBtn.style.top = y + "px";
+    imNoBtn.classList.remove("wiggle");
+    void imNoBtn.offsetWidth;
+    imNoBtn.classList.add("wiggle");
   }
   imNoBtn.addEventListener("mouseenter", dodgeNoBtn);
   imNoBtn.addEventListener("touchstart", (e) => { e.preventDefault(); dodgeNoBtn(); }, { passive: false });
