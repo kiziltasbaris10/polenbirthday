@@ -96,12 +96,19 @@
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
   }
 
-  #introMsg .im-continue {
-    display: block; margin: 24px auto 0;
+  #introMsg .im-ask-wrap {
+    margin-top: 24px; text-align: center;
     opacity: 0; transform: translateY(6px); pointer-events: none;
     transition: opacity .5s ease, transform .5s ease;
   }
-  #introMsg .im-continue.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  #introMsg .im-ask-wrap.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  #introMsg .im-ask-text { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 14px; }
+  #introMsg .im-ask-btns {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    gap: 16px; min-height: 130px; overflow: hidden;
+  }
+  #introMsg .im-no-btn { transition: left .18s ease, top .18s ease; }
+  #introMsg .im-no-btn.dodging { position: absolute; }
 
   #introMsg .im-skip {
     position: absolute; top: 18px; right: 22px;
@@ -330,14 +337,14 @@
 <div id="introMsg">
   <div class="im-card">
     <button class="im-skip" id="imSkipBtn">Atla ⏭</button>
-    <div class="im-badge-top">💌</div>
+    <div class="im-badge-top">🎁</div>
 
     <div class="im-row" id="imRow1">
       <span class="im-badge">👋</span>
       <span class="im-text" id="imText1"></span>
     </div>
     <div class="im-row" id="imRow2">
-      <span class="im-badge">💻</span>
+      <span class="im-badge">🎨</span>
       <span class="im-text" id="imText2"></span>
     </div>
     <div class="im-row" id="imRow3">
@@ -349,7 +356,13 @@
       <div class="im-final" id="imFinal"></div>
     </div>
 
-    <button class="btn btn-primary im-continue" id="imContinueBtn">Devam Et →</button>
+    <div class="im-ask-wrap" id="imAskWrap">
+      <p class="im-ask-text">Kendini hazır hissediyorsan başlayalım mı?</p>
+      <div class="im-ask-btns" id="imAskBtns">
+        <button class="btn btn-primary" id="imYesBtn">Evet 🎉</button>
+        <button class="btn btn-ghost im-no-btn" id="imNoBtn">Hayır</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -547,7 +560,10 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
   }
 
   const introMsg = document.getElementById("introMsg");
-  const imContinueBtn = document.getElementById("imContinueBtn");
+  const imAskWrap = document.getElementById("imAskWrap");
+  const imAskBtns = document.getElementById("imAskBtns");
+  const imYesBtn = document.getElementById("imYesBtn");
+  const imNoBtn = document.getElementById("imNoBtn");
   const imSkipBtn = document.getElementById("imSkipBtn");
   let introMsgDone = false;
 
@@ -593,8 +609,7 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     megaCelebration();
 
     await sleep(500);
-    imContinueBtn.classList.add("show");
-    setTimeout(hideIntroMsg, 6500);
+    imAskWrap.classList.add("show");
   }
 
   function showIntroMsg() {
@@ -607,8 +622,22 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     introMsg.classList.add("hide");
     setTimeout(() => { introMsg.style.display = "none"; }, 850);
   }
-  imContinueBtn.addEventListener("click", hideIntroMsg);
+  imYesBtn.addEventListener("click", hideIntroMsg);
   imSkipBtn.addEventListener("click", hideIntroMsg);
+
+  // "Hayır" imkansız: üstüne gelindiğinde kutunun içinde rastgele bir yere kaçar
+  function dodgeNoBtn() {
+    const wrapRect = imAskBtns.getBoundingClientRect();
+    const btnRect = imNoBtn.getBoundingClientRect();
+    const maxX = Math.max(wrapRect.width - btnRect.width, 0);
+    const maxY = Math.max(wrapRect.height - btnRect.height, 0);
+    imNoBtn.classList.add("dodging");
+    imNoBtn.style.left = Math.random() * maxX + "px";
+    imNoBtn.style.top = Math.random() * maxY + "px";
+  }
+  imNoBtn.addEventListener("mouseenter", dodgeNoBtn);
+  imNoBtn.addEventListener("touchstart", (e) => { e.preventDefault(); dodgeNoBtn(); }, { passive: false });
+  imNoBtn.addEventListener("click", (e) => { e.preventDefault(); dodgeNoBtn(); });
 
   /* ══════════════ decorative floaters ══════════════ */
   const floatEmojis = ["🍀","🌸","💛","🌿","✨"];
