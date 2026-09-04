@@ -6,7 +6,7 @@
 <title>Polen'in Doğum Günü 🍀</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,900;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,900;1,600&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   :root {
@@ -32,10 +32,12 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  button, textarea, input { font-family: inherit; }
 
   body {
     min-height: 100svh;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
     color: var(--ink);
     background: linear-gradient(160deg, #fff7e0 0%, #ffe4f2 45%, #e3f7de 100%);
     overflow-x: hidden;
@@ -93,15 +95,35 @@
     position: relative;
     width: min(580px, 94vw);
     margin: 24px auto;
-    background: var(--i-cream);
+    background:
+      radial-gradient(120% 90px at 50% 0%, rgba(255,255,255,.7), rgba(255,255,255,0) 70%),
+      var(--i-cream);
     border-radius: 28px;
-    padding: 34px 28px 28px;
-    box-shadow: 0 24px 65px rgba(58, 47, 69, .25);
+    padding: 38px 30px 30px;
+    box-shadow: 0 24px 65px rgba(58, 47, 69, .25), 0 0 0 1px rgba(255, 255, 255, .5) inset;
+    border: 1px solid rgba(242, 96, 63, .1);
     opacity: 0; transform: scale(.9) translateY(10px);
     animation: imCardPop .6s cubic-bezier(.34,1.4,.64,1) forwards;
     transition: transform .25s ease-out;
+    overflow: hidden;
   }
   @keyframes imCardPop { to { opacity: 1; transform: scale(1) translateY(0); } }
+  #introMsg .im-card::before,
+  #introMsg .im-card::after {
+    content: ""; position: absolute; width: 74px; height: 74px; border-radius: 50%;
+    background: radial-gradient(circle, var(--i-yellow) 0%, transparent 70%);
+    opacity: .5; pointer-events: none;
+  }
+  #introMsg .im-card::before { top: -30px; left: -24px; }
+  #introMsg .im-card::after {
+    bottom: -30px; right: -24px;
+    background: radial-gradient(circle, var(--i-mint) 0%, transparent 70%);
+  }
+  #introMsg .im-card-sparkle {
+    position: absolute; font-size: 15px; opacity: .55; pointer-events: none;
+    animation: imSparkleTwinkle 2.6s ease-in-out infinite;
+  }
+  @keyframes imSparkleTwinkle { 0%, 100% { opacity: .25; transform: scale(.85); } 50% { opacity: .7; transform: scale(1.1); } }
 
   #introMsg .im-badge-top {
     width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 18px;
@@ -139,7 +161,7 @@
   }
   #introMsg .im-text {
     font-size: clamp(15px, 2.4vw, 17.5px); line-height: 1.65; color: var(--i-ink);
-    padding-top: 4px;
+    padding-top: 4px; letter-spacing: .1px;
   }
   #introMsg .im-text .cursor {
     display: inline-block; width: 2px; height: 1em; background: var(--i-coral-deep);
@@ -147,12 +169,17 @@
   }
   @keyframes imBlink { 50% { opacity: 0; } }
 
+  #introMsg .im-divider {
+    height: 1px; margin: 24px 0 4px; border: none;
+    background: linear-gradient(90deg, transparent, rgba(242, 96, 63, .25), rgba(143, 111, 206, .25), transparent);
+  }
   #introMsg .im-final-wrap { text-align: center; margin-top: 20px; min-height: 90px; }
   #introMsg .im-final {
     display: inline-block; font-family: 'Fraunces', serif; font-style: italic;
     font-size: clamp(34px, 10vw, 58px); font-weight: 900; line-height: 1.1;
     background: linear-gradient(90deg, var(--i-coral-deep), var(--i-lavender-deep), var(--i-mint));
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 18px rgba(242, 96, 63, .18));
     opacity: 0; transform: scale(.4) rotate(-4deg);
   }
   #introMsg .im-final.pop {
@@ -170,7 +197,7 @@
     transition: opacity .5s ease, transform .5s ease;
   }
   #introMsg .im-ask-wrap.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  #introMsg .im-ask-text { font-size: 14px; font-weight: 700; color: var(--i-ink); opacity: .7; margin-bottom: 14px; }
+  #introMsg .im-ask-text { font-size: 15px; font-weight: 700; color: var(--i-ink); opacity: .8; margin-bottom: 16px; letter-spacing: .1px; }
   #introMsg .im-ask-btns {
     position: relative; display: flex; align-items: center; justify-content: center;
     gap: 16px; min-height: 160px; overflow: hidden;
@@ -560,7 +587,7 @@
   .people-photo-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; display: block; }
   .people-modal-photos.single .people-photo-item img { aspect-ratio: 4/3; }
   .people-photo-caption {
-    font-size: 11.5px; line-height: 1.4; color: var(--muted); font-style: italic; font-family: 'Segoe UI', sans-serif;
+    font-size: 11.5px; line-height: 1.4; color: var(--muted); font-style: italic;
   }
   .people-modal-video {
     grid-column: 1 / -1; width: 100%; max-height: 60vh; border-radius: 12px;
@@ -686,6 +713,9 @@
 
 <div id="introMsg" class="event-bg">
   <div class="im-card" id="imCard">
+    <span class="im-card-sparkle" style="top:16px; right:38px; animation-delay:0s;">✨</span>
+    <span class="im-card-sparkle" style="bottom:60px; left:14px; animation-delay:.9s;">✨</span>
+    <span class="im-card-sparkle" style="top:50%; right:10px; animation-delay:1.6s;">⭐</span>
     <button class="im-skip" id="imSkipBtn">Atla ⏭</button>
     <div class="im-badge-top" id="imBadgeTop">🎁</div>
 
@@ -706,6 +736,7 @@
       <span class="im-text" id="imText4"></span>
     </div>
 
+    <hr class="im-divider">
     <div class="im-final-wrap">
       <div class="im-final" id="imFinal"></div>
     </div>
