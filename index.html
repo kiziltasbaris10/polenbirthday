@@ -1330,16 +1330,26 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   }
 
   function finalFireworks() {
+    const colors = ["#ff85c2", "#ffca3a", "#7fd67a", "#b8a4e3", "#ff8266", "#ffffff"];
+
+    // one big opening blast — up the middle plus a cannon from each side —
+    // so the very first moment on this screen already feels huge
+    safeConfetti({ particleCount: 200, spread: 160, startVelocity: 55, origin: { x: 0.5, y: 0.4 }, colors, scalar: 1.2 });
+    safeConfetti({ particleCount: 110, angle: 60, spread: 70, startVelocity: 62, origin: { x: 0, y: 0.6 }, colors });
+    safeConfetti({ particleCount: 110, angle: 120, spread: 70, startVelocity: 62, origin: { x: 1, y: 0.6 }, colors });
+
+    // then keep a longer, denser stream of fireworks going so it doesn't
+    // get lost under the rising emoji chaos
     let count = 0;
     const fw = setInterval(() => {
       safeConfetti({
-        particleCount: 100, startVelocity: 48, spread: 360, scalar: 1.15,
-        origin: { x: Math.random(), y: 0.15 + Math.random() * 0.55 },
-        colors: ["#ff85c2", "#ffca3a", "#7fd67a", "#b8a4e3", "#ff8266", "#ffffff"]
+        particleCount: 130, startVelocity: 50, spread: 360, scalar: 1.15,
+        origin: { x: Math.random(), y: 0.12 + Math.random() * 0.55 },
+        colors
       });
       count++;
-      if (count >= 8) clearInterval(fw);
-    }, 260);
+      if (count >= 18) clearInterval(fw);
+    }, 220);
   }
 
   /* ══════════════ screen navigation ══════════════ */
