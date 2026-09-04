@@ -439,10 +439,12 @@
   .cake-wrap { text-align: center; }
   .cake { font-size: 60px; }
   .candles { display: flex; justify-content: center; gap: 10px; margin-bottom: -4px; }
-  .candle { font-size: 30px; cursor: pointer; transition: transform .15s; user-select: none; }
-  .candle:hover { transform: scale(1.15); }
-  .wish-box { margin-top: 22px; display: none; }
-  .wish-box.show { display: block; animation: pop .5s ease; }
+  .candle { font-size: 30px; user-select: none; display: inline-block; animation: candleWiggle 2.2s ease-in-out infinite; transition: transform .3s ease, opacity .3s ease; }
+  .candle.out { animation: none; transform: scale(.85); opacity: .8; }
+  @keyframes candleWiggle { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  #blowCandlesBtn:disabled { opacity: .5; cursor: not-allowed; }
+  .blow-status { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 8px; min-height: 18px; }
+  .wish-box { margin-top: 22px; }
   textarea.wish-input {
     width: 100%; min-height: 90px; border-radius: 14px; border: 2px solid #f3e0ec;
     padding: 12px 14px; font-family: inherit; font-size: 14.5px; resize: vertical;
@@ -683,9 +685,11 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
 
       <div class="candles" id="candles"></div>
       <div class="cake">🎂</div>
+      <button class="btn btn-primary" id="blowCandlesBtn" style="margin-top:14px">Mumları Üfle 🌬️</button>
+      <div class="blow-status" id="blowStatus"></div>
 
       <div class="wish-box" id="wishBox">
-        <p class="sub">Hepsini söndürdün! Şimdi aklından geçen dileği aşağıya yaz — düşüncelerin yıldızlara yükselsin ✨ Dileğin tamamen sana ait; istersen kendine saklarsın, istersen benimle de paylaşırsın, seçim senin.</p>
+        <p class="sub">Aklından geçen dileği aşağıya yaz — düşüncelerin yıldızlara yükselsin ✨ Dileğin tamamen sana ait; istersen kendine saklarsın, istersen benimle de paylaşırsın, seçim senin.</p>
         <textarea class="wish-input" id="wishInput" placeholder="Dileğim..."></textarea>
         <button class="btn btn-primary" style="margin-top:12px" id="wishSubmitBtn">Dileğimi Tuttum ✨</button>
 
@@ -1686,25 +1690,40 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     document.getElementById("envHint").style.display = "none";
   });
 
-  /* ══════════════ 7. make a wish ══════════════ */
+  /* ══════════════ 7. make a wish ══════════════
+     The wish textarea is always visible from the start — blowing out the
+     candles is a fun optional flourish, never a gate to find the note.
+     Blowing is one action (hold your breath 3s) rather than clicking each
+     candle, which is both more true to the real thing and impossible to miss. */
   const candlesWrap = document.getElementById("candles");
-  const wishBox = document.getElementById("wishBox");
-  let candlesLeft = 5;
+  const blowBtn = document.getElementById("blowCandlesBtn");
+  const blowStatus = document.getElementById("blowStatus");
+  const candleEls = [];
   for (let i = 0; i < 5; i++) {
     const c = document.createElement("span");
     c.className = "candle";
     c.textContent = "🕯️";
-    c.addEventListener("click", () => {
-      if (c.textContent === "💨") return;
-      c.textContent = "💨";
-      candlesLeft--;
-      if (candlesLeft === 0) {
-        wishBox.classList.add("show");
+    candlesWrap.appendChild(c);
+    candleEls.push(c);
+  }
+
+  blowBtn.addEventListener("click", () => {
+    blowBtn.disabled = true;
+    let secondsLeft = 3;
+    blowStatus.textContent = `Üflüyorsun... ${secondsLeft}`;
+    const tick = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft > 0) {
+        blowStatus.textContent = `Üflüyorsun... ${secondsLeft}`;
+      } else {
+        clearInterval(tick);
+        candleEls.forEach((c) => { c.textContent = "💨"; c.classList.add("out"); });
+        blowStatus.textContent = "Hepsi söndü! Dileğini tuttun mu? 🎉";
+        blowBtn.textContent = "Mumlar Söndü ✨";
         burstConfetti();
       }
-    });
-    candlesWrap.appendChild(c);
-  }
+    }, 1000);
+  });
   // thoughts rising up toward the stars, spawned from wherever the wish was written
   function spawnWishStars(originEl) {
     const rect = originEl.getBoundingClientRect();
