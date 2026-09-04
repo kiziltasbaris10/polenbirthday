@@ -80,9 +80,9 @@
   }
   @keyframes imBlink { 50% { opacity: 0; } }
 
-  #introMsg .im-final-wrap { text-align: center; margin-top: 18px; min-height: 56px; }
+  #introMsg .im-final-wrap { text-align: center; margin-top: 18px; min-height: 74px; }
   #introMsg .im-final {
-    display: inline-block; font-size: clamp(24px, 6.5vw, 36px); font-weight: 900;
+    display: inline-block; font-size: clamp(32px, 9vw, 50px); font-weight: 900; line-height: 1.15;
     background: linear-gradient(90deg, var(--pink-deep), var(--yellow-deep), var(--green-deep));
     -webkit-background-clip: text; background-clip: text; color: transparent;
     opacity: 0; transform: scale(.4) rotate(-4deg);
@@ -212,7 +212,6 @@
   .center { text-align: center; }
   .sub { margin-top: 12px; font-size: clamp(14.5px, 2.2vw, 17px); color: var(--muted); line-height: 1.7; }
   .sec-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 22px; }
-  .mascot { font-size: 58px; display: inline-block; animation: sway 2.6s ease-in-out infinite; }
   @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
 
   /* nav buttons */
@@ -228,12 +227,31 @@
   .btn-ghost:hover { color: var(--pink-deep); }
   .btn-full { width: 100%; }
 
-  /* ── intro / countdown ── */
-  .countdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 26px 0 6px; }
-  .cd-box { background: #fff; border-radius: 16px; padding: 14px 12px; min-width: 70px; box-shadow: 0 8px 20px rgba(255,133,194,.25); }
-  .cd-num { font-size: clamp(22px, 5.5vw, 32px); font-weight: 900; color: var(--pink-deep); }
-  .cd-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 2px; }
-  #celebrateMsg { display: none; font-size: clamp(20px, 5.5vw, 32px); font-weight: 900; color: var(--pink-deep); margin: 22px 0 6px; text-align: center; }
+  /* ── birthday intro ── */
+  .mascot-cluster { position: relative; height: 84px; display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 4px; }
+  .mc-item { font-size: 46px; display: inline-block; }
+  .mc-1 { animation: sway 2.6s ease-in-out infinite; }
+  .mc-2 { font-size: 58px; animation: bounceEl 2.2s ease-in-out infinite; }
+  .mc-3 { animation: spinSlow 4s linear infinite; }
+  @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+  .age-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--pink), var(--yellow));
+    border-radius: 999px; padding: 10px 22px; margin: 22px 0 6px;
+    box-shadow: 0 10px 24px rgba(255,133,194,.3);
+  }
+  .age-num { font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  .age-label { font-size: 13.5px; font-weight: 800; color: #fff; }
+
+  .journey-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 24px 0 4px; }
+  .jp-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    background: #fff; border-radius: 16px; padding: 12px 14px; width: 84px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.06);
+  }
+  .jp-icon { font-size: 22px; }
+  .jp-label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.25; }
 
   /* ── 26 things ── */
   .traits-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -375,18 +393,29 @@
   <!-- 1. BIRTHDAY INTRO -->
   <div class="screen active" id="screen-0">
     <div class="card center">
-      <div class="eyebrow">🍀 ŞANSLI GÜN YAKLAŞIYOR 🍀</div>
-      <div class="mascot">🐘</div>
+      <div class="eyebrow">🍀 ŞANSLI GÜN GELDİ 🍀</div>
+
+      <div class="mascot-cluster">
+        <span class="mc-item mc-1">🧸</span>
+        <span class="mc-item mc-2">🐘</span>
+        <span class="mc-item mc-3">🍀</span>
+      </div>
+
       <h1>İyi ki doğdun<br>Polen!</h1>
       <p class="sub">Sana pastel renklerle, biraz şansla ve birkaç sürprizle dolu küçük bir doğum günü deneyimi hazırladım. Hazır olduğunda başlayalım 🌸</p>
 
-      <div class="countdown" id="countdown">
-        <div class="cd-box"><div class="cd-num" id="cd-days">--</div><div class="cd-label">gün</div></div>
-        <div class="cd-box"><div class="cd-num" id="cd-hours">--</div><div class="cd-label">saat</div></div>
-        <div class="cd-box"><div class="cd-num" id="cd-mins">--</div><div class="cd-label">dakika</div></div>
-        <div class="cd-box"><div class="cd-num" id="cd-secs">--</div><div class="cd-label">saniye</div></div>
+      <div class="age-badge">
+        <span class="age-num">26</span>
+        <span class="age-label">yaşındasın bugün 🎂</span>
       </div>
-      <div id="celebrateMsg">🎉 BUGÜN SENİN GÜNÜN, POLEN! 🎉</div>
+
+      <div class="journey-preview">
+        <div class="jp-item"><span class="jp-icon">🍀</span><span class="jp-label">Mini Oyun</span></div>
+        <div class="jp-item"><span class="jp-icon">🎯</span><span class="jp-label">Quiz</span></div>
+        <div class="jp-item"><span class="jp-icon">💛</span><span class="jp-label">Sevenlerin</span></div>
+        <div class="jp-item"><span class="jp-icon">💌</span><span class="jp-label">Mektup</span></div>
+        <div class="jp-item"><span class="jp-icon">🕯️</span><span class="jp-label">Dilek Tut</span></div>
+      </div>
 
       <div class="nav-row" style="justify-content:center">
         <button class="btn btn-primary" onclick="goTo(1)">Başlayalım 🎈</button>
@@ -724,26 +753,6 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /* ══════════════ 1. countdown ══════════════ */
-  const target = new Date(2026, 8, 5, 0, 0, 0);
-  const countdownEl = document.getElementById("countdown");
-  const celebrateEl = document.getElementById("celebrateMsg");
-  function tick() {
-    const diff = target - new Date();
-    if (diff <= 0) {
-      countdownEl.style.display = "none";
-      celebrateEl.style.display = "block";
-      return true;
-    }
-    document.getElementById("cd-days").textContent = Math.floor(diff / 86400000);
-    document.getElementById("cd-hours").textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, "0");
-    document.getElementById("cd-mins").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-    document.getElementById("cd-secs").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-    return false;
-  }
-  const isBirthday = tick();
-  const cdTimer = setInterval(() => { if (tick()) clearInterval(cdTimer); }, 1000);
-  if (isBirthday) burstConfetti();
 
   /* ══════════════ 2. 26 things — EDIT THIS LIST ══════════════
      Fill in as many of the 26 items as you like; anything left
