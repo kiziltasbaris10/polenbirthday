@@ -1399,7 +1399,9 @@ Bu yıl da yoncaların sana getirdiğine inandığın o şansın hiç eksilmesin
     function drawPlayer() {
       const bob = player.grounded ? Math.sin(player.walkPhase * 6) * (Math.abs(player.vx) > 0.1 ? 1.4 : 0) : 0;
       const squash = player.grounded ? 1 : Math.max(0.85, 1 - Math.abs(player.vy) * 0.01);
-      const cx = player.x - camX + P_W / 2;
+      // drawPlayer() always runs inside draw()'s ctx.translate(-camX, 0) block,
+      // so the camera offset must NOT be subtracted again here — world x is enough
+      const cx = player.x + P_W / 2;
       const cy = player.y + P_H - bob;
 
       ctx.save();
