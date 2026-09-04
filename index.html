@@ -420,6 +420,10 @@
   .words-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .words-grid { grid-template-columns: 1fr; } }
   .word-card { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.06); }
+  .word-photo {
+    width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px;
+    margin-bottom: 10px; display: block;
+  }
   .word-name { font-weight: 800; color: var(--pink-deep); font-size: 14px; margin-bottom: 6px; }
   .word-msg { font-size: 13.5px; line-height: 1.55; color: var(--ink); }
   .word-msg.placeholder { color: #c7a9bc; font-style: italic; }
@@ -1688,21 +1692,27 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   });
 
   /* ══════════════ 5. words from your people — EDIT THIS LIST ══════════════
-     Replace name/message with the real notes once you collect them. */
+     Fill in name/message/photo as each friend's note comes in. photo is a
+     path relative to index.html (e.g. "friends/pamir.jpg"); leave "" if
+     there's no photo yet. */
   const friendMessages = [
-    { name: "", message: "" },
-    { name: "", message: "" },
-    { name: "", message: "" },
-    { name: "", message: "" }
+    { name: "Pamir", message: "", photo: "" },
+    { name: "Yağmur", message: "", photo: "" },
+    { name: "Ceren", message: "", photo: "" },
+    { name: "Jovana", message: "My joyful princess wishing you happiest birthday ever! Sending you a lot of love🌸", photo: "friends/jovana.jpg" },
+    { name: "Sofia", message: "", photo: "" }
   ];
   const wordsGrid = document.getElementById("wordsGrid");
   friendMessages.forEach((fm) => {
     const card = document.createElement("div");
     card.className = "word-card";
-    const hasContent = fm.name.trim() || fm.message.trim();
-    card.innerHTML = hasContent
-      ? `<div class="word-name">${fm.name}</div><div class="word-msg">${fm.message}</div>`
-      : `<div class="word-name">İsim buraya</div><div class="word-msg placeholder">mesaj buraya gelecek ✏️</div>`;
+    const hasMessage = fm.message.trim();
+    const photoHtml = fm.photo ? `<img class="word-photo" src="${fm.photo}" alt="${fm.name}">` : "";
+    const nameHtml = `<div class="word-name">${fm.name}</div>`;
+    const msgHtml = hasMessage
+      ? `<div class="word-msg">${fm.message}</div>`
+      : `<div class="word-msg placeholder">mesaj buraya gelecek ✏️</div>`;
+    card.innerHTML = photoHtml + nameHtml + msgHtml;
     wordsGrid.appendChild(card);
   });
 
