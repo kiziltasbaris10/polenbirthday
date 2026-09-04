@@ -1755,7 +1755,21 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
      "" if that photo has no comment). video is a single optional path, or
      "" if there isn't one. */
   const friendMessages = [
-    { name: "Pamir", message: "", photos: [], video: "" },
+    {
+      name: "Pamir",
+      message: "",
+      photos: [
+        { src: "friends/pamir1.jpg", caption: "O zamanlar bu fotoğrafların ileride ne kadar kıymetli olacağını bilmiyorduk." },
+        { src: "friends/pamir2.jpg", caption: "Kardeşlik: %50 sevgi, %50 birbirinin sinirini bozma." },
+        { src: "friends/pamir3.jpg", caption: "İyi ki doğdun. Yoksa çocukluğumun bütün suçlarını kime atardım." },
+        { src: "friends/pamir4.jpg", caption: "Seninle paylaştığım her anının bende ayrı bir yeri var." },
+        { src: "friends/pamir5.jpg", caption: "Belki her zaman söylemiyorum ama seni çok seviyorum." },
+        { src: "friends/pamir6.jpg", caption: "En güzel anılar, en güvenli yer ve hayatımın en özel insanlarından biri." },
+        { src: "friends/pamir7.jpg", caption: "Ne olursa olsun sırtımı yaslayabileceğim birinin olduğunu bilmek…" },
+        { src: "friends/pamir8.jpg", caption: "En güzel yol arkadaşı wuhuuuu “açılın yoldan ferhunde geliyor”" }
+      ],
+      video: ""
+    },
     {
       name: "Yağmur",
       message: "Kaderin ağlarını ördüğü o gün; ortaokuldaki turuncu dolapların önünde başlayan bu yolculuk, yıllar içinde unutulmaz anılarla dolu, dostluğun da ötesinde sımsıcak bir kardeşliğe dönüştü. Sayende bir kez daha anladım ki kardeşlik için kan bağı şart değilmiş… Sen benim ailemin bir parçası oldun, hem de +1 olarak yanında Pamir bebişini de getirerek! 🍀😉😊\n\nİlk tanıştığımız o gün hiçbirimiz böyle paha biçilemez bir şey kazandığımızın farkında değildik belki de. Seninle böyle bir bağ kurabilmek, hayattaki en büyük dönüm noktalarımdan ve şanslarımdan biri 🍀🧿 Sen olmasaydın hayatımda birçok şey eksik kalırdı. Anılarımız gözlerimin önünden bir film şeridi gibi geçti ve hepsine KOCAMAN BİR İYİ Kİ DİYORUM! 🥹\n\nBu arada beraber koskoca 16 seneyi de geride bırakmışız (oysaki daha dün gibi) 🧿 Ve ben çok iyi biliyorum ki tonton neneler oluncaya kadar da kalplerimiz hiç ayrılmayacak. Ne olursa olsun, her zaman bir telefon kadar uzağındayım ve uzağımdasın… Tekrardan hayata teşekkür ediyorum bizim yollarımızı kesiştirdiği için ve sonsuzlukta devam ettirdiği için.\n\nÇok uzatmadan sadede gelirsek de en içtenn İYİ Kİ VARSIN KARDEŞİM! 🤍 Her şeyinle hayatımda olan varlığın için minnettarım. Her doğum gününde sana iyi ki varsın demek beni ayrıca çok mutlu ediyor; çünkü ne kadar şanslı olduğumu bana bir kez daha hatırlatıyorsun. SENİ ÇoOoK SEVİYORUM KARDEŞİM BENİM! 🐘🤍\n\nSenin mutluluğunla havalara uçan, başarınla gururlanan, bir tek gözyaşına bile dünyayı karşına alan bir kardeşin var burada; daima ve her koşulda...🤍♾️\n\nYeni yaşında da hayallerimize yeni tikler atacağımız; başarı, huzur, sağlık ve bereket dolu, sevdiklerimizle birlikte daha nice güzel anılar biriktireceğimiz muhteşem yılların olsun kardeşim! 🎂✨Doğum günün kutlu olsun hayatımın neşesiii 🥹😊😘 ve tabiki #foreverpolyağ ♥️\n\nYağmur Uzuner",
@@ -1807,8 +1821,19 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
   function openPeopleModal(fm) {
     peopleModalName.textContent = fm.name;
     const hasMessage = fm.message.trim();
-    peopleModalMessage.textContent = hasMessage ? fm.message : "Notu henüz gelmedi, yakında burada olacak ✏️";
-    peopleModalMessage.classList.toggle("placeholder", !hasMessage);
+    const hasAnyContent = hasMessage || fm.photos.length > 0 || fm.video;
+    if (hasMessage) {
+      peopleModalMessage.textContent = fm.message;
+      peopleModalMessage.classList.remove("placeholder");
+      peopleModalMessage.style.display = "";
+    } else if (hasAnyContent) {
+      // photos/captions speak for themselves — no need for a "nothing yet" note
+      peopleModalMessage.style.display = "none";
+    } else {
+      peopleModalMessage.textContent = "Notu henüz gelmedi, yakında burada olacak ✏️";
+      peopleModalMessage.classList.add("placeholder");
+      peopleModalMessage.style.display = "";
+    }
     peopleModalPhotos.innerHTML = "";
     peopleModalPhotos.className = "people-modal-photos" + (fm.photos.length <= 1 ? " single" : "");
     if (fm.video) {
