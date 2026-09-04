@@ -549,6 +549,23 @@
     text-align: center; max-width: 82vw; padding: 0 16px; line-height: 1.35;
   }
 
+  /* floating background-music play/pause control, visible on every screen */
+  .music-toggle {
+    position: fixed; right: 18px; bottom: 18px; z-index: 5000;
+    width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--pink), var(--yellow));
+    color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 24px rgba(255, 133, 194, .35);
+    transition: transform .15s ease;
+  }
+  .music-toggle:hover { transform: scale(1.08); }
+  .music-toggle:active { transform: scale(.94); }
+  .music-toggle.playing { animation: musicPulse 1.8s ease-in-out infinite; }
+  @keyframes musicPulse {
+    0%, 100% { box-shadow: 0 10px 24px rgba(255, 133, 194, .35), 0 0 0 0 rgba(255, 133, 194, .45); }
+    50% { box-shadow: 0 10px 24px rgba(255, 133, 194, .35), 0 0 0 10px rgba(255, 133, 194, 0); }
+  }
+
   .people-overlay {
     position: fixed; inset: 0; z-index: 2000; display: none;
     align-items: center; justify-content: center; padding: 20px;
@@ -766,6 +783,9 @@
   <div class="pt-emoji" id="ptEmoji">🎉</div>
   <div class="pt-text" id="ptText"></div>
 </div>
+
+<audio id="bgMusic" src="bg-music.mp3" loop preload="none"></audio>
+<button id="musicToggle" class="music-toggle" aria-label="Müziği çal/durdur">🎵</button>
 
 <div class="people-overlay" id="peopleOverlay">
   <div class="people-modal" id="peopleModal">
@@ -1367,6 +1387,47 @@ Seni çok seviyorum.<div class="letter-close">Maple leaf diyarından<br>Barış 
     }, holdMs);
   }
 
+  /* ══════════════ background music ══════════════
+     A persistent floating button lets Polen play/pause a song whenever she
+     wants, from any screen. Whenever any <video> on the page starts playing
+     (the final screen's video, or a friend's video opened from "A Few Words
+     From Your People"), the music auto-pauses; once that video pauses or
+     ends, the music resumes right where it left off — but only if it was
+     actually playing before, so a manual pause is respected. */
+  const bgMusic = document.getElementById("bgMusic");
+  const musicToggle = document.getElementById("musicToggle");
+  let musicWasPlayingBeforeVideo = false;
+
+  musicToggle.addEventListener("click", () => {
+    if (bgMusic.paused) bgMusic.play().catch(() => {});
+    else bgMusic.pause();
+  });
+  bgMusic.addEventListener("play", () => {
+    musicToggle.classList.add("playing");
+    musicToggle.textContent = "⏸️";
+  });
+  bgMusic.addEventListener("pause", () => {
+    musicToggle.classList.remove("playing");
+    musicToggle.textContent = "🎵";
+  });
+
+  // "play"/"pause"/"ended" don't bubble, but a capturing listener on
+  // document still sees them from any <video>, including ones created
+  // later (like a friend's video inside the people modal)
+  document.addEventListener("play", (e) => {
+    if (e.target.tagName === "VIDEO" && !bgMusic.paused) {
+      musicWasPlayingBeforeVideo = true;
+      bgMusic.pause();
+    }
+  }, true);
+  function resumeMusicIfNeeded(e) {
+    if (e.target.tagName === "VIDEO" && musicWasPlayingBeforeVideo) {
+      musicWasPlayingBeforeVideo = false;
+      bgMusic.play().catch(() => {});
+    }
+  }
+  document.addEventListener("pause", resumeMusicIfNeeded, true);
+  document.addEventListener("ended", resumeMusicIfNeeded, true);
 
   /* ══════════════ 2. memory game ══════════════
      elephant, strawberry, clover, avocado, potato, teddy bear. */
